@@ -1,6 +1,15 @@
-from backends.linux import LinuxInhibitor
-import time
-h = LinuxInhibitor()
-h.start()
-time.sleep(10)     
-h.stop()
+from controller import Controller
+
+c = Controller()
+
+c.start(minutes=1)
+
+print("DozeGuard is active!")
+
+try:
+    input("Press Enter to stop DozeGuard...")
+finally:
+    c.stop()
+    print("DozeGuard stopped!")
+
+

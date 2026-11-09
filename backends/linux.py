@@ -5,12 +5,32 @@ class LinuxInhibitor:
         self.proc = None
 
     def start(self):
-        self.proc = subprocess.Popen([
-            "systemd-inhibit", "--what=sleep", "--who=DozeGuard",
-            "--why=session", "sleep", "infinity"
-        ])
+        if self.proc is not None and self.proc.poll() is None:
+            return
+
+        
+        self.proc = subprocess.Popen(
+            [
+                "systemd-inhibit",
+                "--what=sleep",
+                "--who=DozeGuard",
+                "--why=Active keep-awake session",
+                "--mode=block",
+                "sleep",
+                "infinity",
+            ]
+        )
+
 
     def stop(self):
         if self.proc is not None:
-            self.proc.terminate()
+            if self.proc.poll() is None:
+                self.proc.terminate()
+
+                try:
+                    self.proc.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    self.proc.kill()
+                    self.proc.wait()
+
             self.proc = None
