@@ -34,3 +34,4 @@ class LinuxInhibitor:
                     self.proc.wait()
 
             self.proc = None
+            
