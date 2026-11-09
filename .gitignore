@@ -1,6 +1,6 @@
 # Python virtual environment
-.venv/
-venv/
+.Doze-env/
+vv/
 
 # Python cache
 __pycache__/
