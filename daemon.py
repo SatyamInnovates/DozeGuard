@@ -1,17 +1,29 @@
-
-import socket
 import os
+import socket
+import sys
 
+from backends.linux import cleanup_orphans
 from controller import Controller
 
 SOCKET_PATH = "/tmp/dozeguard.sock"
 
 
+def another_daemon_is_alive(path):
+    probe = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        probe.connect(path)
+        return True               # connected: a live daemon is there
+    except ConnectionRefusedError:
+        return False              # stale file, nobody listening
+    except FileNotFoundError:
+        return False              # no file at all
+    finally:
+        probe.close()
+
+
 def handle_command(command, controller):
     parts = command.split()
 
-
-    
     if not parts:
         return "ERROR: Empty command", False
 
@@ -65,13 +77,18 @@ def handle_command(command, controller):
 
 
 def start_daemon():
+    if another_daemon_is_alive(SOCKET_PATH):
+        sys.exit("DozeGuard daemon is already running")
+
+
+    if os.path.exists(SOCKET_PATH):
+        os.remove(SOCKET_PATH)
+    cleanup_orphans()
+
     server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     controller = Controller()
 
     try:
-        if os.path.exists(SOCKET_PATH):
-            os.remove(SOCKET_PATH)
-
         server.bind(SOCKET_PATH)
         server.listen()
 

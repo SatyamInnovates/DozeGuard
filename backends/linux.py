@@ -1,4 +1,7 @@
 import subprocess
+import psutil
+
+MARKER = "--why=DozeGuard keep-awake session"
 
 class LinuxInhibitor:
     def __init__(self):
@@ -14,12 +17,13 @@ class LinuxInhibitor:
                 "systemd-inhibit",
                 "--what=sleep",
                 "--who=DozeGuard",
-                "--why=Active keep-awake session",
+                "--why=DozeGuard keep-awake session",
                 "--mode=block",
                 "sleep",
                 "infinity",
             ]
         )
+
 
 
     def stop(self):
@@ -34,4 +38,18 @@ class LinuxInhibitor:
                     self.proc.wait()
 
             self.proc = None
-            
+
+    
+                 
+def cleanup_orphans():
+    ended = 0
+    for proc in psutil.process_iter(["cmdline"]):
+        cmd = proc.info["cmdline"] or []
+        if MARKER in cmd:
+            try:
+                proc.terminate()
+                ended += 1
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+    return ended
+
