@@ -16,11 +16,20 @@ class Controller:
         self.last_battery_check = 0
         self.battery_interval = 20
 
+
     def start(self, minutes=None):
         if self.session.is_active():
-            return False
-
-        self.last_battery_check = 0          
+            return False,"A session is already active."
+        percent,plugged = read_battery()
+        if should_stop(percent,plugged):
+            logger.warning(
+                "session start blocked, reasong=battery floor,"
+                "percent=%s,plugged=%s",
+                percent,
+                plugged
+            )
+            return False,(f"Battery too low {percent:.0f}%""Connect your charger to start DozeGuard.")
+        self.last_battery_check = time.monotonic()
         self.session.start(minutes)
 
         try:
@@ -31,7 +40,8 @@ class Controller:
             raise
 
         logger.info("session started, minutes=%s", minutes)
-        return True
+        return True, None
+
 
     def stop(self, reason="manual"):
         was_active = self.session.active
@@ -48,6 +58,7 @@ class Controller:
             if was_active:
                 logger.info("session stopped, reason=timer expired")
         return active
+
 
     def tick(self):
         if not self.is_active():

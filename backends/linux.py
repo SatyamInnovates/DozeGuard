@@ -56,7 +56,6 @@ def cleanup_orphans():
     return ended
 
 
-
 def read_battery():
     b = psutil.sensors_battery()
     if b is None:

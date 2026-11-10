@@ -8,7 +8,6 @@ from pathlib import Path
 
 
 
-
 LOG_DIR = Path.home() / ".local" / "state" / "dozeguard"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -19,7 +18,6 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 
 )
-
 
 
 
@@ -37,6 +35,7 @@ def another_daemon_is_alive(path):
         return False              
     finally:
         probe.close()
+
 
 
 def handle_command(command, controller):
@@ -61,13 +60,12 @@ def handle_command(command, controller):
             except ValueError:
                 return "ERROR: Minutes must be a number", False
 
-        started = controller.start(minutes)
-
+        started,message = controller.start(minutes)
         if not started:
-            return "A session is already active.", False
-
+            return message,False
         duration = f"{minutes} minutes" if minutes else "unlimited"
-        return f"DozeGuard started: {duration}", False
+        return f"DozeGuard started : {duration}", False
+
 
     elif action == "stop":
         if len(parts) != 1:
