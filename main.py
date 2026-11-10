@@ -4,6 +4,9 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+import logging
+
+
 
 SOCKET_PATH = "/tmp/dozeguard.sock"
 BASE_DIR = Path(__file__).resolve().parent

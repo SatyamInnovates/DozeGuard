@@ -1,5 +1,7 @@
 import subprocess
 import psutil
+import logging
+
 
 MARKER = "--why=DozeGuard keep-awake session"
 
@@ -53,3 +55,10 @@ def cleanup_orphans():
                 pass
     return ended
 
+
+
+def read_battery():
+    b = psutil.sensors_battery()
+    if b is None:
+        return None,True
+    return b.percent,b.power_plugged

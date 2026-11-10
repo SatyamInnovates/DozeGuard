@@ -1,9 +1,27 @@
 import os
 import socket
 import sys
-
 from backends.linux import cleanup_orphans
 from controller import Controller
+import logging
+from pathlib import Path
+
+
+
+
+LOG_DIR = Path.home() / ".local" / "state" / "dozeguard"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+
+logging.basicConfig(
+    filename=LOG_DIR / "daemon.log",
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+
+)
+
+
+
 
 SOCKET_PATH = "/tmp/dozeguard.sock"
 
@@ -12,11 +30,11 @@ def another_daemon_is_alive(path):
     probe = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     try:
         probe.connect(path)
-        return True               # connected: a live daemon is there
+        return True               
     except ConnectionRefusedError:
-        return False              # stale file, nobody listening
+        return False              
     except FileNotFoundError:
-        return False              # no file at all
+        return False              
     finally:
         probe.close()
 
@@ -92,7 +110,7 @@ def start_daemon():
         server.bind(SOCKET_PATH)
         server.listen()
 
-        # Wake up periodically to check the session timer.
+        # Wake up
         server.settimeout(1)
 
         print("DozeGuard daemon is running...")
@@ -103,7 +121,7 @@ def start_daemon():
             try:
                 connection, _ = server.accept()
             except socket.timeout:
-                controller.is_active()
+                controller.tick()
                 continue
 
             with connection:
