@@ -108,7 +108,6 @@ def start_daemon():
         server.bind(SOCKET_PATH)
         server.listen()
 
-        # Wake up
         server.settimeout(1)
 
         print("DozeGuard daemon is running...")

@@ -26,8 +26,23 @@ def ask_daemon(command):
 
 
 def run_cli(*args):
-    subprocess.run([sys.executable, str(MAIN), *args], cwd=MAIN.parent)
+    result = subprocess.run(
+        [sys.executable,str(MAIN),*args],
+        cwd=MAIN.parent,
+        capture_output=True,
+        text=True
+    )
 
+
+    message = result.stdout.strip() or result.stderr.strip()
+
+    if "Battery too low" in message:
+        icon = QSystemTrayIcon.MessageIcon.Warning
+    else:
+        icon = QSystemTrayIcon.MessageIcon.Information
+
+
+    tray.showMessage("DozeGuard",message or "Something went wrong",icon,5000)
 
 def make_icon(color):
     pix = QPixmap(64, 64)
