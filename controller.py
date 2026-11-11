@@ -1,13 +1,10 @@
 import logging
 import time
-
 from core.session import Session
 from core.battery_rule import should_stop
 from backends.linux import LinuxInhibitor, read_battery
 
 logger = logging.getLogger(__name__)
-
-
 
 class Controller:
     def __init__(self):
