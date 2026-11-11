@@ -3,31 +3,20 @@ import os
 import socket
 import sys
 import logging
-from pathlib import Path
+import stat
 
 from backends.linux import cleanup_orphans
 from controller import Controller
+from paths import socket_path, state_directory
 
-
-LOG_DIR = Path.home() / ".local" / "state" / "dozeguard"
-LOG_DIR.mkdir(parents=True, exist_ok=True)
-
-logging.basicConfig(
-    filename=LOG_DIR / "daemon.log",
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-)
 
 logger = logging.getLogger(__name__)
-
-SOCKET_PATH = "/tmp/dozeguard.sock"
-
 
 def another_daemon_is_alive(path):
     probe = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
     try:
-        probe.connect(path)
+        probe.connect(str(path))
         return True
 
     except (ConnectionRefusedError, FileNotFoundError):
@@ -35,6 +24,17 @@ def another_daemon_is_alive(path):
 
     finally:
         probe.close()
+
+
+def remove_stale_socket(path):
+    """Remove only a stale socket owned by this user; refuse other paths."""
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return
+    if not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.getuid():
+        raise RuntimeError(f"Refusing to remove unexpected socket path: {path}")
+    path.unlink()
 
 
 def handle_command(command, controller):
@@ -93,11 +93,17 @@ def handle_command(command, controller):
 
 
 def start_daemon():
-    if another_daemon_is_alive(SOCKET_PATH):
+    socket_file = socket_path()
+    log_dir = state_directory()
+    logging.basicConfig(
+        filename=log_dir / "daemon.log",
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
+    if another_daemon_is_alive(socket_file):
         sys.exit("DozeGuard daemon is already running")
 
-    if os.path.exists(SOCKET_PATH):
-        os.remove(SOCKET_PATH)
+    remove_stale_socket(socket_file)
 
     cleanup_orphans()
 
@@ -105,7 +111,8 @@ def start_daemon():
     controller = Controller(battery_floor=30)
 
     try:
-        server.bind(SOCKET_PATH)
+        server.bind(str(socket_file))
+        socket_file.chmod(0o600)
         server.listen()
         server.settimeout(1)
 
@@ -127,12 +134,19 @@ def start_daemon():
                 if not data:
                     continue
 
-                command = data.decode().strip()
-                print("Received:", command)
+                try:
+                    command = data.decode("utf-8").strip()
+                except UnicodeDecodeError:
+                    connection.sendall(b"ERROR: Invalid command encoding")
+                    continue
 
-                response, should_shutdown = handle_command(
-                    command, controller
-                )
+                try:
+                    response, should_shutdown = handle_command(command, controller)
+                except Exception as error:
+                    logger.exception("Command failed")
+                    response, should_shutdown = (
+                        f"ERROR: {error}", False
+                    )
 
                 connection.sendall(response.encode())
 
@@ -143,8 +157,12 @@ def start_daemon():
         controller.stop()
         server.close()
 
-        if os.path.exists(SOCKET_PATH):
-            os.remove(SOCKET_PATH)
+        try:
+            info = socket_file.lstat()
+            if stat.S_ISSOCK(info.st_mode) and info.st_uid == os.getuid():
+                socket_file.unlink()
+        except FileNotFoundError:
+            pass
 
         print("DozeGuard daemon stopped.")
 

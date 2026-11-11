@@ -1,16 +1,14 @@
 import argparse
+import logging
 import socket
 import subprocess
 import sys
 import time
-from pathlib import Path
-import logging
+from paths import socket_path
 
 
 
-SOCKET_PATH = "/tmp/dozeguard.sock"
-BASE_DIR = Path(__file__).resolve().parent
-DAEMON_PATH = BASE_DIR / "daemon.py"
+logger = logging.getLogger("dozeguard.cli")
 
 
 def create_parser():
@@ -42,7 +40,7 @@ def send_command(command):
     client.settimeout(2)
 
     try:
-        client.connect(SOCKET_PATH)
+        client.connect(str(socket_path()))
         client.sendall(command.encode())
         response = client.recv(1024)
         return response.decode()
@@ -53,8 +51,7 @@ def send_command(command):
 
 def start_daemon():
     subprocess.Popen(
-        [sys.executable, str(DAEMON_PATH)],
-        cwd=str(BASE_DIR),
+        [sys.executable, "-m", "daemon"],
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
@@ -101,6 +98,7 @@ def main():
     try:
         print(send_command_with_autostart(command))
     except (OSError, RuntimeError) as error:
+        logger.error("DozeGuard command failed: %s", error)
         print(f"DozeGuard error: {error}")
         sys.exit(1)
 

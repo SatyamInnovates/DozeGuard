@@ -2,7 +2,7 @@ import logging
 import time
 from core.session import Session
 from core.battery_rule import should_stop
-from backends.linux import LinuxInhibitor, read_battery
+from backends.linux import create_inhibitor, read_battery
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +15,9 @@ class Controller:
             )
         self.battery_floor = battery_floor
         self.session = Session()
-        self.inhibitor = LinuxInhibitor()
+        self.inhibitor = create_inhibitor()
         self.last_battery_check = 0
         self.battery_interval = 20    
-
-# checing
 
     def start(self, minutes=None):
         if self.session.is_active():
@@ -32,8 +30,8 @@ class Controller:
                 percent,
                 plugged
             )
-            return False,(f"Battery too low {percent:.0f}%"
-                          "Connect your charger to start DozeGuard.")
+            return False, (f"Battery too low ({percent:.0f}%). "
+                           "Connect your charger to start DozeGuard.")
         self.last_battery_check = time.monotonic()
         self.session.start(minutes)
 
@@ -63,22 +61,6 @@ class Controller:
                 logger.info("session stopped, reason=timer expired")
         return active
 
-    def status(self):
-        percent, plugged = read_battery()
-
-        if self.is_active():
-            remaining = self.session.remaining_time()
-
-            return (
-                "Status: Active\n"
-                f"Remaining: {remaining}\n"
-                f"Battery: {percent:.0f}%\n"
-            )
-
-        return (
-        "Status: Idle\n"
-        f"Battery: {percent:.0f}%\n"
-        )
     def tick(self):
         if not self.is_active():
             return
@@ -116,10 +98,13 @@ class Controller:
             f"{percent:.0f}%" if percent is not None else "Unavailable"
         )
 
-        charging_text = "Charging" if plugged else "Not charging"
+        if plugged is None:
+            power_text = "Power state unknown"
+        else:
+            power_text = "Charging" if plugged else "Not charging"
 
         return (
             f"{status_text}\n"
             f"Remaining: {remaining_text}\n"
-            f"Battery: {battery_text} ({charging_text})"
+            f"Battery: {battery_text} ({power_text})"
         )
