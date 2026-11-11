@@ -11,3 +11,8 @@ __pycache__/
 
 # IDE
 .vscode/
+
+# Python packaging artifacts
+build/
+dist/
+*.egg-info/

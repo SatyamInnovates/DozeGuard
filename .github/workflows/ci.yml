@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  distro-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [ubuntu:24.04, debian:stable-slim, fedora:latest, archlinux:latest, opensuse/tumbleweed]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run unit suite in distribution container
+        env:
+          DISTRO_IMAGE: ${{ matrix.image }}
+        run: |
+          docker run --rm -v "$PWD:/src:ro" -e DISTRO_IMAGE "$DISTRO_IMAGE" /bin/sh -ec '
+            case "$DISTRO_IMAGE" in
+              ubuntu:*|debian:*) apt-get update; apt-get install -y python3 python3-venv python3-pip gcc python3-dev ;;
+              fedora:*) dnf -y install python3 python3-pip python3-devel gcc ;;
+              archlinux:*) pacman -Syu --noconfirm python python-pip python-setuptools gcc ;;
+              opensuse/*) zypper --non-interactive refresh; zypper --non-interactive install python3 python3-pip python3-devel gcc ;;
+            esac
+            python3 -m venv /tmp/dg-venv
+            /tmp/dg-venv/bin/pip install /src/.[test]
+            cd /src
+            /tmp/dg-venv/bin/python -m pytest -q
+          '
+
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-26.04]
+        python: ['3.11', '3.12', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -e '.[test]'
+      - run: python -m pytest -q
+      - run: python -m pip wheel --no-deps --wheel-dir dist .
+
+  fedora-smoke:
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: dnf -y install python3 python3-pip python3-devel gcc
+      - run: python3 -m pip install --break-system-packages -e '.[test]'
+      - run: python3 -m pytest -q

@@ -1,0 +1,17 @@
+Source: dozeguard
+Section: utils
+Priority: optional
+Maintainer: DozeGuard contributors <noreply@example.invalid>
+Build-Depends: debhelper-compat (= 13), dh-python, pybuild-plugin-pyproject,
+ python3-all, python3-setuptools, python3-wheel
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Homepage: https://github.com/SatyamInnovates/DozeGuard
+
+Package: dozeguard
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}, python3-psutil, python3-dbus-next
+Suggests: python3-pyside6
+Description: Per-user Linux sleep inhibitor
+ DozeGuard temporarily inhibits system sleep while a user session is active.
+ Sleep inhibition currently requires systemd-logind.

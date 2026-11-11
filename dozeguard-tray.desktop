@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=DozeGuard
+Comment=Keep this session awake
+Exec=dozeguard-tray
+Terminal=false
+Categories=Utility;
