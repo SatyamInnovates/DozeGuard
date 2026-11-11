@@ -20,7 +20,6 @@ logging.basicConfig(
 )
 
 
-
 SOCKET_PATH = "/tmp/dozeguard.sock"
 
 def another_daemon_is_alive(path):
@@ -34,8 +33,6 @@ def another_daemon_is_alive(path):
         return False              
     finally:
         probe.close()
-
-
 
 
 

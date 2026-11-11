@@ -19,6 +19,7 @@ class Controller:
         self.last_battery_check = 0
         self.battery_interval = 20    
 
+# checing
 
     def start(self, minutes=None):
         if self.session.is_active():
@@ -46,9 +47,8 @@ class Controller:
         logger.info("session started, minutes=%s", minutes)
         return True, None
 
-
     def stop(self, reason="manual"):
-        was_active = self.session.active
+        was_active = self.session.actiadfve
         self.inhibitor.stop()
         self.session.stop()
         if was_active:                   
