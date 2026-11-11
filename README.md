@@ -5,18 +5,15 @@ inhibitor. The command line interface works without the optional Qt tray.
 
 ## Compatibility
 
-The CLI, per-user Unix socket, and battery reporting target Fedora, Ubuntu,
-Debian, Linux Mint, Arch Linux, and openSUSE. Sleep inhibition currently uses
-`systemd-logind` over the system D-Bus. A working system bus and logind service
-are required to start an active session. DozeGuard does **not** currently
-provide a non-systemd inhibition backend, so installations without logind are
-not supported for sleep prevention.
+See [COMPATIBILITY.md](COMPATIBILITY.md) for the tested and untested distro,
+package, and desktop combinations. Sleep inhibition uses `systemd-logind` over
+the system D-Bus; a working system bus and logind service are required to
+start a session. DozeGuard has no non-systemd inhibition backend.
 
-Battery telemetry comes from psutil. On systems without a readable battery,
-DozeGuard reports battery and power state as unknown and allows the session to
-start, preserving desktop behavior. The tray requires PySide6 and a desktop
-session that provides a system tray host. Tray support is optional and can be
-unavailable or hidden depending on desktop settings and extensions.
+Battery telemetry comes from psutil. If battery state cannot be read,
+DozeGuard reports it as unknown and allows the session to start. The optional
+tray requires PySide6 and a desktop session that provides a tray host; no
+GNOME, KDE Plasma, XFCE, or Cinnamon tray compatibility is currently claimed.
 
 ## Install from source
 
@@ -30,7 +27,9 @@ python3 -m venv ~/.venvs/dozeguard
 
 Omit `[tray]` for CLI-only use. Distribution packages should install the
 runtime dependencies using native package dependencies; package recipes are
-provided in `debian/`, `dozeguard.spec`, and `PKGBUILD`.
+provided in `debian/`, `dozeguard.spec`, and `PKGBUILD`. The Qt tray remains an
+optional PySide6 extra because Qt 6 bindings are not packaged under one
+consistent name across the target Debian and Ubuntu releases.
 
 ## Use
 
@@ -39,6 +38,7 @@ dozeguard start 30
 dozeguard start       # until stopped
 dozeguard status
 dozeguard stop
+dozeguard shutdown   # stop the daemon and remove its runtime socket
 dozeguard-tray        # optional GUI frontend
 ```
 
@@ -48,6 +48,10 @@ owned by the user. Otherwise it uses `~/.local/run/dozeguard/`. Logs are under
 `$XDG_STATE_HOME/dozeguard/` or `~/.local/state/dozeguard/`. Both directories
 are user-private. DozeGuard does not install or enable an automatic startup
 service.
+
+`stop` ends an active keep-awake session but leaves the daemon available for
+later commands. `shutdown` asks the existing daemon to release its inhibitor,
+exit, and remove its socket. It does not start a daemon when none is running.
 
 ## Development
 

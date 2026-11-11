@@ -17,6 +17,7 @@ def test_runtime_directory_uses_private_xdg_runtime(monkeypatch, tmp_path):
     assert result.stat().st_uid == os.getuid()
 
 
+
 def test_runtime_directory_falls_back_for_public_xdg_dir(monkeypatch, tmp_path):
     runtime = tmp_path / "runtime"
     runtime.mkdir(mode=0o755)

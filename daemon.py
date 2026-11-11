@@ -154,17 +154,26 @@ def start_daemon():
                     running = False
 
     finally:
-        controller.stop()
-        server.close()
-
         try:
-            info = socket_file.lstat()
-            if stat.S_ISSOCK(info.st_mode) and info.st_uid == os.getuid():
-                socket_file.unlink()
-        except FileNotFoundError:
-            pass
+            controller.stop()
+        except Exception:
+            logger.exception("Failed to stop controller during daemon cleanup")
+        finally:
+            try:
+                server.close()
+            except OSError:
+                logger.exception("Failed to close daemon socket")
 
-        print("DozeGuard daemon stopped.")
+            try:
+                info = socket_file.lstat()
+                if stat.S_ISSOCK(info.st_mode) and info.st_uid == os.getuid():
+                    socket_file.unlink()
+            except FileNotFoundError:
+                pass
+            except OSError:
+                logger.exception("Failed to remove daemon socket")
+
+            logger.info("DozeGuard daemon stopped")
 
 
 if __name__ == "__main__":

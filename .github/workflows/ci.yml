@@ -5,7 +5,28 @@ on:
   pull_request:
 
 jobs:
-  distro-tests:
+  python-and-wheel:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-26.04]
+        python: ['3.10', '3.11', '3.12', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -e '.[test]'
+      - run: python -m pytest -q
+      - run: python -m pip wheel --no-deps --wheel-dir dist .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dozeguard-wheel-py${{ matrix.python }}-${{ matrix.os }}
+          path: dist/*.whl
+          if-no-files-found: error
+
+  distribution-tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -30,27 +51,116 @@ jobs:
             /tmp/dg-venv/bin/python -m pytest -q
           '
 
-  tests:
+  deb-packages:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, ubuntu-26.04]
-        python: ['3.11', '3.12', '3.13']
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-      - run: python -m pip install -e '.[test]'
-      - run: python -m pytest -q
-      - run: python -m pip wheel --no-deps --wheel-dir dist .
-
-  fedora-smoke:
+        include:
+          - distro: debian
+            image: debian:stable-slim
+          - distro: ubuntu
+            image: ubuntu:24.04
     runs-on: ubuntu-latest
-    container: fedora:latest
+    container:
+      image: ${{ matrix.image }}
     steps:
       - uses: actions/checkout@v4
-      - run: dnf -y install python3 python3-pip python3-devel gcc
-      - run: python3 -m pip install --break-system-packages -e '.[test]'
-      - run: python3 -m pytest -q
+      - name: Build, install, exercise, and remove DEB
+        run: |
+          apt-get update
+          apt-get install -y build-essential debhelper-compat dh-python pybuild-plugin-pyproject python3-all python3-setuptools python3-wheel python3-psutil python3-dbus-next
+          dpkg-buildpackage -us -uc -b
+          cp ../dozeguard_0.1.0-1_all.deb /tmp/dozeguard-v1.deb
+          sed -i '1s/0.1.0-1/0.1.0-2/' debian/changelog
+          dpkg-buildpackage -us -uc -b
+          apt-get install -y /tmp/dozeguard-v1.deb
+          dozeguard --help
+          python3 -c 'import main, daemon, controller, backends.linux, core.session'
+          test -f /usr/share/applications/dozeguard-tray.desktop
+          apt-get install -y ../dozeguard_0.1.0-2_all.deb
+          dpkg-query -W -f='${Version}\n' dozeguard | grep -Fx '0.1.0-2'
+          apt-get remove -y dozeguard
+          test ! -e /usr/bin/dozeguard
+          test ! -e /usr/bin/dozeguard-tray
+          test ! -e /usr/share/applications/dozeguard-tray.desktop
+          mkdir -p dist
+          cp ../dozeguard_0.1.0-2_all.deb dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dozeguard-deb-${{ matrix.distro }}
+          path: dist/*.deb
+          if-no-files-found: error
+
+  fedora-rpm:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build, install, exercise, and remove RPM
+        run: |
+          dnf -y install git rpm-build python3-devel python3-setuptools python3-pip python3-wheel python3-psutil python3-dbus-next
+          mkdir -p /root/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+          source_commit=$(git rev-parse HEAD)
+          git archive --format=tar.gz --prefix="DozeGuard-${source_commit}/" "$source_commit" > "/root/rpmbuild/SOURCES/${source_commit}.tar.gz"
+          cp dozeguard-tray.desktop /root/rpmbuild/SOURCES/dozeguard-tray.desktop
+          rpmbuild --define '_topdir /root/rpmbuild' --define "sourcecommit ${source_commit}" -ba dozeguard.spec
+          cp /root/rpmbuild/RPMS/noarch/dozeguard-0.1.0-1*.noarch.rpm /tmp/dozeguard-v1.rpm
+          sed -e 's/^Release:.*/Release: 2%{?dist}/' -e 's/0.1.0-1$/0.1.0-2/' dozeguard.spec > /tmp/dozeguard-release2.spec
+          rpmbuild --define '_topdir /root/rpmbuild' --define "sourcecommit ${source_commit}" -ba /tmp/dozeguard-release2.spec
+          dnf -y install /tmp/dozeguard-v1.rpm
+          dozeguard --help
+          python3 -c 'import main, daemon, controller, backends.linux, core.session'
+          test -f /usr/share/applications/dozeguard-tray.desktop
+          dnf -y install /root/rpmbuild/RPMS/noarch/dozeguard-0.1.0-2*.noarch.rpm
+          rpm -q --qf '%{RELEASE}\n' dozeguard | grep '^2\.'
+          dnf -y remove dozeguard
+          test ! -e /usr/bin/dozeguard
+          test ! -e /usr/bin/dozeguard-tray
+          test ! -e /usr/share/applications/dozeguard-tray.desktop
+          mkdir -p dist
+          cp /root/rpmbuild/RPMS/noarch/dozeguard-0.1.0-2*.noarch.rpm dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dozeguard-rpm-fedora
+          path: dist/*.rpm
+          if-no-files-found: error
+
+  arch-package:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build, install, exercise, and remove Arch package
+        run: |
+          pacman -Syu --noconfirm base-devel git python python-pip python-build python-installer python-setuptools python-wheel python-psutil python-dbus-next
+          useradd -m builder
+          mkdir -p /tmp/dozeguard
+          cp -a . /tmp/dozeguard/
+          chown -R builder:builder /tmp/dozeguard
+          runuser -u builder -- /bin/bash -ec 'cd /tmp/dozeguard && makepkg --syncdeps --noconfirm --cleanbuild'
+          cp /tmp/dozeguard/dozeguard-0.1.0-1-any.pkg.tar.zst /tmp/dozeguard-v1.pkg.tar.zst
+          sed 's/^pkgrel=1$/pkgrel=2/' /tmp/dozeguard/PKGBUILD > /tmp/dozeguard/PKGBUILD.new
+          mv /tmp/dozeguard/PKGBUILD.new /tmp/dozeguard/PKGBUILD
+          chown builder:builder /tmp/dozeguard/PKGBUILD
+          runuser -u builder -- /bin/bash -ec 'cd /tmp/dozeguard && makepkg --syncdeps --noconfirm --cleanbuild'
+          pacman -U --noconfirm /tmp/dozeguard-v1.pkg.tar.zst
+          dozeguard --help
+          python -c 'import main, daemon, controller, backends.linux, core.session'
+          test -f /usr/share/applications/dozeguard-tray.desktop
+          pacman -U --noconfirm /tmp/dozeguard/dozeguard-0.1.0-2-any.pkg.tar.zst
+          pacman -Q dozeguard | grep -F '0.1.0-2'
+          pacman -Rns --noconfirm dozeguard
+          test ! -e /usr/bin/dozeguard
+          test ! -e /usr/bin/dozeguard-tray
+          test ! -e /usr/share/applications/dozeguard-tray.desktop
+          mkdir -p dist
+          cp /tmp/dozeguard/dozeguard-0.1.0-2-any.pkg.tar.zst dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dozeguard-arch-package
+          path: dist/*.pkg.tar.zst
+          if-no-files-found: error

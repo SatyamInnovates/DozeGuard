@@ -19,7 +19,7 @@ def create_parser():
 
     parser.add_argument(
         "command",
-        choices=["start", "stop", "status"],
+        choices=["start", "stop", "status", "shutdown"],
         help="Command to execute"
     )
 
@@ -60,6 +60,10 @@ def start_daemon():
 
 
 def send_command_with_autostart(command):
+    # Shutdown must never launch a daemon merely to terminate it.
+    if command == "shutdown":
+        return send_command(command)
+
     try:
         return send_command(command)
 
