@@ -48,7 +48,7 @@ class Controller:
         return True, None
 
     def stop(self, reason="manual"):
-        was_active = self.session.actiadfve
+        was_active = self.session.active
         self.inhibitor.stop()
         self.session.stop()
         if was_active:                   
@@ -63,7 +63,22 @@ class Controller:
                 logger.info("session stopped, reason=timer expired")
         return active
 
+    def status(self):
+        percent, plugged = read_battery()
 
+        if self.is_active():
+            remaining = self.session.remaining_time()
+
+            return (
+                "Status: Active\n"
+                f"Remaining: {remaining}\n"
+                f"Battery: {percent:.0f}%\n"
+            )
+
+        return (
+        "Status: Idle\n"
+        f"Battery: {percent:.0f}%\n"
+        )
     def tick(self):
         if not self.is_active():
             return
@@ -76,3 +91,35 @@ class Controller:
         percent, plugged = read_battery()
         if should_stop(percent, plugged,self.battery_floor):
             self.stop(f"battery floor, percent={percent}, plugged={plugged}")
+
+
+    def status(self):
+        active = self.is_active()
+        percent, plugged = read_battery()
+
+        if active:
+            remaining = self.session.remaining()
+
+            if remaining is None:
+                remaining_text = "Unlimited"
+            else:
+                minutes = int(remaining) // 60
+                seconds = int(remaining) % 60
+                remaining_text = f"{minutes:02d}:{seconds:02d}"
+
+            status_text = "Status: Active"
+        else:
+            remaining_text = "None"
+            status_text = "Status: Idle"
+
+        battery_text = (
+            f"{percent:.0f}%" if percent is not None else "Unavailable"
+        )
+
+        charging_text = "Charging" if plugged else "Not charging"
+
+        return (
+            f"{status_text}\n"
+            f"Remaining: {remaining_text}\n"
+            f"Battery: {battery_text} ({charging_text})"
+        )

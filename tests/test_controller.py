@@ -31,9 +31,6 @@ def test_stop_stops_session_and_inhibitor(monkeypatch):
     assert not c.session.is_active()
     assert stopped == [True]
 
-
-
-
 def test_duplicate_start_does_not_start_inhibitor_twice(monkeypatch):
     c = Controller()
 
@@ -46,7 +43,6 @@ def test_duplicate_start_does_not_start_inhibitor_twice(monkeypatch):
     assert len(started) == 1
 
     c.stop()
-
 
 
 def test_inhibitor_failure_resets_session(monkeypatch):
@@ -81,3 +77,6 @@ def test_timer_expiration_releases_inhibitor(monkeypatch):
 
     assert not c.is_active()
     assert stopped == [True]
+
+
+    

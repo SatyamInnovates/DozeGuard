@@ -61,25 +61,31 @@ menu.addAction("Stop").triggered.connect(lambda: run_cli("stop"))
 menu.addSeparator()
 menu.addAction("Quit tray").triggered.connect(app.quit)
 
+
+
 tray.setContextMenu(menu)
 
 def refresh():
     reply = ask_daemon("status")
+
     if reply is None:
         tray.setIcon(make_icon("gray"))
         tray.setToolTip("DozeGuard: daemon not running")
-    elif "Active" in reply:
+
+    elif "Status: Active" in reply:
         tray.setIcon(make_icon("green"))
-        tray.setToolTip("DozeGuard: awake")
+        tray.setToolTip(f"DozeGuard\n{reply}")
     else:
         tray.setIcon(make_icon("orange"))
         tray.setToolTip("DozeGuard: idle")
 
 
 
+
+
 timer = QTimer()
 timer.timeout.connect(refresh)
-timer.start(2000)         
+timer.start(1000)         
 refresh()                 
 
 tray.show()

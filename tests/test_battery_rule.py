@@ -11,9 +11,6 @@ def test_continue_when_battery_above_floor():
     assert should_stop(50, False, 30) is False
 
 
-
-
-
 def test_continue_when_charger_connected():
     assert should_stop(20, True, 30) is False
 
@@ -25,3 +22,6 @@ def test_continue_when_battery_unknown():
 def test_custom_battery_floor():
     assert should_stop(20, False, 20) is True
     assert should_stop(25, False, 20) is False
+
+
+# junks files
