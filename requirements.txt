@@ -1,10 +1,2 @@
-psutil
-pystray
-Pillow
-pytest
-dbus-next
-
-
-
-
-
+psutil>=5.9
+dbus-next>=0.2.3

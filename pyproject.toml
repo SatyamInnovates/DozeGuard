@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dozeguard"
+version = "0.1.0"
+description = "A per-user Linux sleep inhibitor"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "DozeGuard contributors"}]
+dependencies = ["psutil>=5.9", "dbus-next>=0.2.3"]
+
+[project.optional-dependencies]
+tray = ["PySide6>=6.5"]
+test = ["pytest>=7"]
+
+[project.scripts]
+dozeguard = "main:main"
+dozeguard-tray = "tray:main"
+
+[tool.setuptools]
+py-modules = ["main", "daemon", "controller", "paths", "tray"]
+
+[tool.setuptools.packages.find]
+include = ["backends*", "core*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
