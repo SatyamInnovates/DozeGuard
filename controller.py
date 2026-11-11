@@ -7,25 +7,32 @@ from backends.linux import LinuxInhibitor, read_battery
 logger = logging.getLogger(__name__)
 
 class Controller:
-    def __init__(self):
+    def __init__(self, battery_floor=30):
+
+        if not isinstance(battery_floor, int) or not 0 <= battery_floor <= 100:
+            raise ValueError(
+                "battery_floor must be an integer between 0 and 100"
+            )
+        self.battery_floor = battery_floor
         self.session = Session()
         self.inhibitor = LinuxInhibitor()
         self.last_battery_check = 0
-        self.battery_interval = 20
+        self.battery_interval = 20    
 
 
     def start(self, minutes=None):
         if self.session.is_active():
             return False,"A session is already active."
         percent,plugged = read_battery()
-        if should_stop(percent,plugged):
+        if should_stop(percent,plugged,self.battery_floor):
             logger.warning(
-                "session start blocked, reasong=battery floor,"
+                "session start blocked, reason=battery floor,"
                 "percent=%s,plugged=%s",
                 percent,
                 plugged
             )
-            return False,(f"Battery too low {percent:.0f}%""Connect your charger to start DozeGuard.")
+            return False,(f"Battery too low {percent:.0f}%"
+                          "Connect your charger to start DozeGuard.")
         self.last_battery_check = time.monotonic()
         self.session.start(minutes)
 
@@ -67,5 +74,5 @@ class Controller:
         self.last_battery_check = now
 
         percent, plugged = read_battery()
-        if should_stop(percent, plugged):
+        if should_stop(percent, plugged,self.battery_floor):
             self.stop(f"battery floor, percent={percent}, plugged={plugged}")

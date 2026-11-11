@@ -1,7 +1,9 @@
-
-import subprocess
+import asyncio
+import os
 import psutil
-import logging
+from dbus_next.aio import MessageBus
+from dbus_next.constants import BusType
+
 
 
 MARKER = "--why=DozeGuard keep-awake session"
@@ -9,36 +11,55 @@ MARKER = "--why=DozeGuard keep-awake session"
 
 class LinuxInhibitor:
     def __init__(self):
-        self.proc = None
+        self.fd = None
+
+    async def _acquire(self):
+        bus = await MessageBus(
+            bus_type=BusType.SYSTEM,
+            negotiate_unix_fd=True
+        ).connect()
+
+        try:
+            introspection = await bus.introspect(
+                "org.freedesktop.login1",
+                "/org/freedesktop/login1"
+            )
+
+            obj = bus.get_proxy_object(
+                "org.freedesktop.login1",
+                "/org/freedesktop/login1",
+                introspection
+            )
+
+            manager = obj.get_interface(
+                "org.freedesktop.login1.Manager"
+            )
+
+            fd = await manager.call_inhibit(
+                "sleep",
+                "DozeGuard",
+                "DozeGuard keep-awake session",
+                "block"
+            )
+
+            return fd
+
+        finally:
+            bus.disconnect()
 
     def start(self):
-        if self.proc is not None and self.proc.poll() is None:
+        if self.fd is not None:
             return
 
-        self.proc = subprocess.Popen(
-            [
-                "systemd-inhibit",
-                "--what=sleep",
-                "--who=DozeGuard",
-                "--why=DozeGuard keep-awake session",
-                "--mode=block",
-                "sleep",
-                "infinity",
-            ]
-        )
+        fd = asyncio.run(self._acquire())
+        self.fd = fd
 
     def stop(self):
-        if self.proc is not None:
-            if self.proc.poll() is None:
-                self.proc.terminate()
+        if self.fd is None:
+            return
 
-                try:
-                    self.proc.wait(timeout=3)
-                except subprocess.TimeoutExpired:
-                    self.proc.kill()
-                    self.proc.wait()
-
-            self.proc = None
+        os.close(self.fd)
+        self.fd = None
 
 
 def cleanup_orphans():
@@ -58,9 +79,9 @@ def cleanup_orphans():
 
 
 def read_battery():
-    b = psutil.sensors_battery()
+    battery = psutil.sensors_battery()
 
-    if b is None:
+    if battery is None:
         return None, True
 
-    return b.percent, b.power_plugged
+    return battery.percent, battery.power_plugged

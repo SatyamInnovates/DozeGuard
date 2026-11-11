@@ -23,7 +23,6 @@ logging.basicConfig(
 
 SOCKET_PATH = "/tmp/dozeguard.sock"
 
-
 def another_daemon_is_alive(path):
     probe = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     try:
@@ -35,6 +34,8 @@ def another_daemon_is_alive(path):
         return False              
     finally:
         probe.close()
+
+
 
 
 
@@ -73,16 +74,26 @@ def handle_command(command, controller):
 
         controller.stop()
         return "DozeGuard stopped.", False
-
     elif action == "status":
         if len(parts) != 1:
-            return "ERROR: Usage: status", False
-
+            return "Error: usage:status",False
         if controller.is_active():
-            return "Status: Active", False
+            remaining = controller.session.remaining()
 
-        return "Status: Inactive", False
+            if remaining is None:
+                return "Status: Active\nRemaining:Unlimited",False
+            minutes = int(remaining // 60)
+            seconds = int(remaining % 60)
 
+            return (
+                f"Status: Active\n"
+                f"Remaining: {minutes:02d}:{seconds:02d}",
+                False
+            )
+
+        return "Status: Inactive", False    
+
+    
     elif action == "shutdown":
         if len(parts) != 1:
             return "ERROR: Usage: shutdown", False
@@ -102,7 +113,7 @@ def start_daemon():
     cleanup_orphans()
 
     server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    controller = Controller()
+    controller = Controller(battery_floor=30)
 
     try:
         server.bind(SOCKET_PATH)

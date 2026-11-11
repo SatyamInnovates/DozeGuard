@@ -5,17 +5,17 @@ from controller import Controller
 def test_start_starts_session_and_inhibitor(monkeypatch):
     c = Controller()
 
-
     started = []
-
     monkeypatch.setattr(c.inhibitor, "start", lambda: started.append(True))
 
-    assert c.start(minutes=30) is True
+    success, message = c.start(minutes=30)
+
+    assert success is True
+    assert message is None
     assert c.session.is_active()
     assert started == [True]
 
     c.stop()
-
 
 def test_stop_stops_session_and_inhibitor(monkeypatch):
     c = Controller()
@@ -41,14 +41,11 @@ def test_duplicate_start_does_not_start_inhibitor_twice(monkeypatch):
 
     monkeypatch.setattr(c.inhibitor, "start", lambda: started.append(True))
 
-    assert c.start(minutes=30) is True
-    assert c.start(minutes=30) is False
-
+    assert c.start(minutes=30)[0] is True
+    assert c.start(minutes=30)[0] is False
     assert len(started) == 1
 
     c.stop()
-
-
 
 
 

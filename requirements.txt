@@ -2,4 +2,9 @@ psutil
 pystray
 Pillow
 pytest
- 
+dbus-next
+
+
+
+
+
