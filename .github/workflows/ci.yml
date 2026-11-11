@@ -17,7 +17,7 @@ jobs:
         env:
           DISTRO_IMAGE: ${{ matrix.image }}
         run: |
-          docker run --rm -v "$PWD:/src:ro" -e DISTRO_IMAGE "$DISTRO_IMAGE" /bin/sh -ec '
+          docker run --rm -v "$PWD:/src" -e DISTRO_IMAGE "$DISTRO_IMAGE" /bin/sh -ec '
             case "$DISTRO_IMAGE" in
               ubuntu:*|debian:*) apt-get update; apt-get install -y python3 python3-venv python3-pip gcc python3-dev ;;
               fedora:*) dnf -y install python3 python3-pip python3-devel gcc ;;

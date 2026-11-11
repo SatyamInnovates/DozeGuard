@@ -18,7 +18,7 @@ def _private_directory(path: Path) -> Path:
 
 
 def state_directory() -> Path:
-    base = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state"))
+    base = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state")
     return _private_directory(base / APP_NAME)
 
 
