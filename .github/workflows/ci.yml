@@ -118,16 +118,18 @@ jobs:
           dnf -y install git rpm-build desktop-file-utils python3-devel python3-setuptools python3-pip python3-wheel python3-psutil python3-dbus-next
           desktop-file-validate dozeguard-tray.desktop dozeguard-tray-autostart.desktop
           mkdir -p /root/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
-          source_commit=$(git rev-parse HEAD)
-          git archive --format=tar.gz --prefix="DozeGuard-${source_commit}/" "$source_commit" > "/root/rpmbuild/SOURCES/${source_commit}.tar.gz"
-          cp dozeguard-tray.desktop /root/rpmbuild/SOURCES/dozeguard-tray.desktop
-          cp dozeguard-tray-autostart.desktop /root/rpmbuild/SOURCES/dozeguard-tray-autostart.desktop
-          rpmbuild --define '_topdir /root/rpmbuild' --define "sourcecommit ${source_commit}" -ba dozeguard.spec
+          repo_dir="${GITHUB_WORKSPACE:?GITHUB_WORKSPACE is required}"
+          source_commit="${GITHUB_SHA:?GITHUB_SHA is required}"
+          test -f "$repo_dir/dozeguard.spec"
+          tar -C "$repo_dir" --exclude=.git --transform="s|^\./|DozeGuard-${source_commit}/|" -czf "/root/rpmbuild/SOURCES/${source_commit}.tar.gz" .
+          cp "$repo_dir/dozeguard-tray.desktop" /root/rpmbuild/SOURCES/dozeguard-tray.desktop
+          cp "$repo_dir/dozeguard-tray-autostart.desktop" /root/rpmbuild/SOURCES/dozeguard-tray-autostart.desktop
+          rpmbuild --define '_topdir /root/rpmbuild' --define "sourcecommit ${source_commit}" -ba "$repo_dir/dozeguard.spec"
           ! rpm -qpl /root/rpmbuild/RPMS/noarch/dozeguard-1.0.0-1*.noarch.rpm | grep -E 'dozeguard-tray.desktop|xdg/autostart'
           rpm -qpl /root/rpmbuild/RPMS/noarch/dozeguard-tray-1.0.0-1*.noarch.rpm | grep -F 'xdg/autostart/dozeguard-tray.desktop'
           cp /root/rpmbuild/RPMS/noarch/dozeguard-1.0.0-1*.noarch.rpm /tmp/dozeguard-v1-core.rpm
           cp /root/rpmbuild/RPMS/noarch/dozeguard-tray-1.0.0-1*.noarch.rpm /tmp/dozeguard-v1-tray.rpm
-          sed -e 's/^Release:.*/Release: 2%{?dist}/' -e 's/1.0.0-1$/1.0.0-2/' dozeguard.spec > /tmp/dozeguard-release2.spec
+          sed -e 's/^Release:.*/Release: 2%{?dist}/' -e 's/1.0.0-1$/1.0.0-2/' "$repo_dir/dozeguard.spec" > /tmp/dozeguard-release2.spec
           rpmbuild --define '_topdir /root/rpmbuild' --define "sourcecommit ${source_commit}" -ba /tmp/dozeguard-release2.spec
           dnf -y install /tmp/dozeguard-v1-core.rpm /tmp/dozeguard-v1-tray.rpm
           dozeguard --help
@@ -169,18 +171,16 @@ jobs:
           pacman -Syu --noconfirm base-devel git desktop-file-utils python python-pip python-build python-installer python-setuptools python-wheel python-psutil python-dbus-next pyside6
           desktop-file-validate dozeguard-tray.desktop dozeguard-tray-autostart.desktop
           useradd -m builder
-          repo_dir="$GITHUB_WORKSPACE"
-          git -C "$repo_dir" rev-parse --is-inside-work-tree
-          source_commit=$(git -C "$repo_dir" rev-parse HEAD)
-          git clone --bare "$repo_dir" /tmp/dozeguard-source.git
+          repo_dir="${GITHUB_WORKSPACE:?GITHUB_WORKSPACE is required}"
+          test -f "$repo_dir/PKGBUILD"
+          tar -C "$repo_dir" --exclude=.git --transform='s|^\./|dozeguard/|' -czf /tmp/dozeguard-source.tar.gz .
           mkdir -p /tmp/dozeguard
-          git -C "$repo_dir" archive "$source_commit" | tar -x -C /tmp/dozeguard
+          cp "$repo_dir/PKGBUILD" /tmp/dozeguard/PKGBUILD
           sed -E \
-            -e 's|git\+https://github.com/SatyamInnovates/DozeGuard.git|git+file:///tmp/dozeguard-source.git|' \
-            -e "s|#commit=[0-9a-f]{40}|#commit=${source_commit}|" \
+            -e 's|^source=.*$|source=("$pkgbase::file:///tmp/dozeguard-source.tar.gz")|' \
             /tmp/dozeguard/PKGBUILD > /tmp/dozeguard/PKGBUILD.new
           mv /tmp/dozeguard/PKGBUILD.new /tmp/dozeguard/PKGBUILD
-          chown -R builder:builder /tmp/dozeguard /tmp/dozeguard-source.git
+          chown -R builder:builder /tmp/dozeguard
           runuser -u builder -- /bin/bash -ec 'cd /tmp/dozeguard && makepkg --syncdeps --noconfirm --cleanbuild'
           ! bsdtar -tf /tmp/dozeguard/dozeguard-1.0.0-1-any.pkg.tar.zst | grep -E 'dozeguard-tray.desktop|xdg/autostart'
           bsdtar -tf /tmp/dozeguard/dozeguard-tray-1.0.0-1-any.pkg.tar.zst | grep -F 'etc/xdg/autostart/dozeguard-tray.desktop'
