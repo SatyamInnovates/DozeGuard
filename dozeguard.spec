@@ -1,7 +1,7 @@
 Name:           dozeguard
 Version:        1.0.0
 Release:        1%{?dist}
-%{!?sourcecommit:%global sourcecommit 1a74da5a27c86c9fe18c6fe4556091780bc64ee6}
+%{!?sourcecommit:%global sourcecommit 94bd28761a2d094453271ce083e8474c8c8a4474}
 Summary:        Per-user Linux sleep inhibitor
 License:        MIT
 BuildArch:      noarch

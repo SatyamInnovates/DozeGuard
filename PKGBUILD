@@ -8,7 +8,7 @@ license=('MIT')
 depends=('python' 'python-psutil' 'python-dbus-next')
 optdepends=('pyside6: optional system tray frontend')
 makedepends=('python-setuptools' 'python-wheel' 'python-build' 'python-installer')
-source=("$pkgname::git+https://github.com/SatyamInnovates/DozeGuard.git#commit=1a74da5a27c86c9fe18c6fe4556091780bc64ee6")
+source=("$pkgname::git+https://github.com/SatyamInnovates/DozeGuard.git#commit=94bd28761a2d094453271ce083e8474c8c8a4474")
 sha256sums=('SKIP')
 
 build() {
