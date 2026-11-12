@@ -1,7 +1,7 @@
 Name:           dozeguard
-Version:        0.1.0
+Version:        1.0.0
 Release:        1%{?dist}
-%{!?sourcecommit:%global sourcecommit 6f4b23d1c2fea08179d96fe009467cccf5f909f7}
+%{!?sourcecommit:%global sourcecommit 1a74da5a27c86c9fe18c6fe4556091780bc64ee6}
 Summary:        Per-user Linux sleep inhibitor
 License:        MIT
 BuildArch:      noarch
@@ -37,5 +37,5 @@ install -Dpm0644 %{SOURCE1} %{buildroot}%{_datadir}/applications/dozeguard-tray.
 %{_datadir}/applications/dozeguard-tray.desktop
 
 %changelog
-* Wed Nov 11 2026 DozeGuard contributors <noreply@example.invalid> - 0.1.0-1
+* Thu Nov 12 2026 DozeGuard contributors <noreply@example.invalid> - 1.0.0-1
 - Initial packaged release

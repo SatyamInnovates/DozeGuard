@@ -1,5 +1,5 @@
 pkgname=dozeguard
-pkgver=0.1.0
+pkgver=1.0.0
 pkgrel=1
 pkgdesc='Per-user Linux sleep inhibitor'
 arch=('any')
@@ -8,7 +8,7 @@ license=('MIT')
 depends=('python' 'python-psutil' 'python-dbus-next')
 optdepends=('pyside6: optional system tray frontend')
 makedepends=('python-setuptools' 'python-wheel' 'python-build' 'python-installer')
-source=("$pkgname::git+https://github.com/SatyamInnovates/DozeGuard.git#commit=6f4b23d1c2fea08179d96fe009467cccf5f909f7")
+source=("$pkgname::git+https://github.com/SatyamInnovates/DozeGuard.git#commit=1a74da5a27c86c9fe18c6fe4556091780bc64ee6")
 sha256sums=('SKIP')
 
 build() {

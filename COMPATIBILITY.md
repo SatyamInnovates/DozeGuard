@@ -45,10 +45,11 @@ Package removal does not currently signal per-user daemons. Run
 stops the daemon, and removes its runtime socket. Package removal still retains
 user logs and state under XDG directories.
 
-RPM and Arch upgrade checks are defined in CI but were not exercised locally.
-The Debian 0.1.0-1 to 0.1.0-2 upgrade was exercised locally. RPM and Arch
-recipes are pinned to the published Phase 1 source commit so their sources are
-fetchable before a version tag exists; maintainers must update those pins and
-package releases when publishing a new application version. Project metadata
-and all package recipes still identify this as version 0.1.0; a v1.0.0 release
-must first align the application version, package versions, and source pins.
+The planned release version is 1.0.0. Historical validation entries above refer
+to packages built as version 0.1.0; they are not evidence that version 1.0.0
+packages have been built or installed. RPM and Arch recipes are pinned to source commit
+`1a74da5a27c86c9fe18c6fe4556091780bc64ee6`. Debian packages are built from the
+selected source checkout and have no separate source commit pin. Package
+version metadata is aligned to 1.0.0. Package build and installation results
+for this release source revision should be recorded separately from the
+historical Phase 2 validation above.

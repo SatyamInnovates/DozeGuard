@@ -1,3 +1,9 @@
+dozeguard (1.0.0-1) unstable; urgency=medium
+
+  * Prepare the 1.0.0 release.
+
+ -- DozeGuard contributors <noreply@example.invalid>  Thu, 12 Nov 2026 00:00:00 +0000
+
 dozeguard (0.1.0-1) unstable; urgency=medium
 
   * Initial packaged release.

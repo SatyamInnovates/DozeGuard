@@ -70,21 +70,21 @@ jobs:
           apt-get update
           apt-get install -y build-essential debhelper-compat dh-python pybuild-plugin-pyproject python3-all python3-setuptools python3-wheel python3-psutil python3-dbus-next
           dpkg-buildpackage -us -uc -b
-          cp ../dozeguard_0.1.0-1_all.deb /tmp/dozeguard-v1.deb
-          sed -i '1s/0.1.0-1/0.1.0-2/' debian/changelog
+          cp ../dozeguard_1.0.0-1_all.deb /tmp/dozeguard-v1.deb
+          sed -i '1s/1.0.0-1/1.0.0-2/' debian/changelog
           dpkg-buildpackage -us -uc -b
           apt-get install -y /tmp/dozeguard-v1.deb
           dozeguard --help
           python3 -c 'import main, daemon, controller, backends.linux, core.session'
           test -f /usr/share/applications/dozeguard-tray.desktop
-          apt-get install -y ../dozeguard_0.1.0-2_all.deb
-          dpkg-query -W -f='${Version}\n' dozeguard | grep -Fx '0.1.0-2'
+          apt-get install -y ../dozeguard_1.0.0-2_all.deb
+          dpkg-query -W -f='${Version}\n' dozeguard | grep -Fx '1.0.0-2'
           apt-get remove -y dozeguard
           test ! -e /usr/bin/dozeguard
           test ! -e /usr/bin/dozeguard-tray
           test ! -e /usr/share/applications/dozeguard-tray.desktop
           mkdir -p dist
-          cp ../dozeguard_0.1.0-2_all.deb dist/
+          cp ../dozeguard_1.0.0-2_all.deb dist/
       - uses: actions/upload-artifact@v4
         with:
           name: dozeguard-deb-${{ matrix.distro }}
@@ -107,21 +107,21 @@ jobs:
           git archive --format=tar.gz --prefix="DozeGuard-${source_commit}/" "$source_commit" > "/root/rpmbuild/SOURCES/${source_commit}.tar.gz"
           cp dozeguard-tray.desktop /root/rpmbuild/SOURCES/dozeguard-tray.desktop
           rpmbuild --define '_topdir /root/rpmbuild' --define "sourcecommit ${source_commit}" -ba dozeguard.spec
-          cp /root/rpmbuild/RPMS/noarch/dozeguard-0.1.0-1*.noarch.rpm /tmp/dozeguard-v1.rpm
-          sed -e 's/^Release:.*/Release: 2%{?dist}/' -e 's/0.1.0-1$/0.1.0-2/' dozeguard.spec > /tmp/dozeguard-release2.spec
+          cp /root/rpmbuild/RPMS/noarch/dozeguard-1.0.0-1*.noarch.rpm /tmp/dozeguard-v1.rpm
+          sed -e 's/^Release:.*/Release: 2%{?dist}/' -e 's/1.0.0-1$/1.0.0-2/' dozeguard.spec > /tmp/dozeguard-release2.spec
           rpmbuild --define '_topdir /root/rpmbuild' --define "sourcecommit ${source_commit}" -ba /tmp/dozeguard-release2.spec
           dnf -y install /tmp/dozeguard-v1.rpm
           dozeguard --help
           python3 -c 'import main, daemon, controller, backends.linux, core.session'
           test -f /usr/share/applications/dozeguard-tray.desktop
-          dnf -y install /root/rpmbuild/RPMS/noarch/dozeguard-0.1.0-2*.noarch.rpm
+          dnf -y install /root/rpmbuild/RPMS/noarch/dozeguard-1.0.0-2*.noarch.rpm
           rpm -q --qf '%{RELEASE}\n' dozeguard | grep '^2\.'
           dnf -y remove dozeguard
           test ! -e /usr/bin/dozeguard
           test ! -e /usr/bin/dozeguard-tray
           test ! -e /usr/share/applications/dozeguard-tray.desktop
           mkdir -p dist
-          cp /root/rpmbuild/RPMS/noarch/dozeguard-0.1.0-2*.noarch.rpm dist/
+          cp /root/rpmbuild/RPMS/noarch/dozeguard-1.0.0-2*.noarch.rpm dist/
       - uses: actions/upload-artifact@v4
         with:
           name: dozeguard-rpm-fedora
@@ -142,7 +142,7 @@ jobs:
           cp -a . /tmp/dozeguard/
           chown -R builder:builder /tmp/dozeguard
           runuser -u builder -- /bin/bash -ec 'cd /tmp/dozeguard && makepkg --syncdeps --noconfirm --cleanbuild'
-          cp /tmp/dozeguard/dozeguard-0.1.0-1-any.pkg.tar.zst /tmp/dozeguard-v1.pkg.tar.zst
+          cp /tmp/dozeguard/dozeguard-1.0.0-1-any.pkg.tar.zst /tmp/dozeguard-v1.pkg.tar.zst
           sed 's/^pkgrel=1$/pkgrel=2/' /tmp/dozeguard/PKGBUILD > /tmp/dozeguard/PKGBUILD.new
           mv /tmp/dozeguard/PKGBUILD.new /tmp/dozeguard/PKGBUILD
           chown builder:builder /tmp/dozeguard/PKGBUILD
@@ -151,14 +151,14 @@ jobs:
           dozeguard --help
           python -c 'import main, daemon, controller, backends.linux, core.session'
           test -f /usr/share/applications/dozeguard-tray.desktop
-          pacman -U --noconfirm /tmp/dozeguard/dozeguard-0.1.0-2-any.pkg.tar.zst
-          pacman -Q dozeguard | grep -F '0.1.0-2'
+          pacman -U --noconfirm /tmp/dozeguard/dozeguard-1.0.0-2-any.pkg.tar.zst
+          pacman -Q dozeguard | grep -F '1.0.0-2'
           pacman -Rns --noconfirm dozeguard
           test ! -e /usr/bin/dozeguard
           test ! -e /usr/bin/dozeguard-tray
           test ! -e /usr/share/applications/dozeguard-tray.desktop
           mkdir -p dist
-          cp /tmp/dozeguard/dozeguard-0.1.0-2-any.pkg.tar.zst dist/
+          cp /tmp/dozeguard/dozeguard-1.0.0-2-any.pkg.tar.zst dist/
       - uses: actions/upload-artifact@v4
         with:
           name: dozeguard-arch-package
