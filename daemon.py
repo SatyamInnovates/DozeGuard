@@ -16,7 +16,7 @@ CLIENT_READ_TIMEOUT = 1.0
 
 
 def receive_command(connection):
-    """Read one EOF-terminated IPC command, returning an error if invalid."""
+    
     chunks = []
     size = 0
     connection.settimeout(CLIENT_READ_TIMEOUT)
@@ -63,7 +63,6 @@ def another_daemon_is_alive(path):
 
 
 def remove_stale_socket(path):
-    """Remove only a stale socket owned by this user; refuse other paths."""
     try:
         info = path.lstat()
     except FileNotFoundError:
