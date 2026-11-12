@@ -169,10 +169,12 @@ jobs:
           pacman -Syu --noconfirm base-devel git desktop-file-utils python python-pip python-build python-installer python-setuptools python-wheel python-psutil python-dbus-next pyside6
           desktop-file-validate dozeguard-tray.desktop dozeguard-tray-autostart.desktop
           useradd -m builder
-          source_commit=$(git rev-parse HEAD)
-          git clone --bare . /tmp/dozeguard-source.git
+          repo_dir="$GITHUB_WORKSPACE"
+          git -C "$repo_dir" rev-parse --is-inside-work-tree
+          source_commit=$(git -C "$repo_dir" rev-parse HEAD)
+          git clone --bare "$repo_dir" /tmp/dozeguard-source.git
           mkdir -p /tmp/dozeguard
-          git archive "$source_commit" | tar -x -C /tmp/dozeguard
+          git -C "$repo_dir" archive "$source_commit" | tar -x -C /tmp/dozeguard
           sed -E \
             -e 's|git\+https://github.com/SatyamInnovates/DozeGuard.git|git+file:///tmp/dozeguard-source.git|' \
             -e "s|#commit=[0-9a-f]{40}|#commit=${source_commit}|" \
