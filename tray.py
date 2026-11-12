@@ -183,6 +183,7 @@ def main():
             f"padding: 8px; color: {status_color};"
         )
 
+
         if tray_available:
             tray.setIcon(make_icon(icon_color))
             tray.setToolTip(f"DozeGuard\n{reply}")

@@ -6,10 +6,7 @@ import sys
 import time
 from paths import socket_path
 
-
-
 logger = logging.getLogger("dozeguard.cli")
-
 
 def create_parser():
     parser = argparse.ArgumentParser(
@@ -22,6 +19,7 @@ def create_parser():
         choices=["start", "stop", "status", "shutdown"],
         help="Command to execute"
     )
+
 
     parser.add_argument(
         "minutes",
