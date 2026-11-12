@@ -153,6 +153,7 @@ def main():
                 client.settimeout(1)
                 client.connect(str(socket_path()))
                 client.sendall(b"status")
+                client.shutdown(socket.SHUT_WR)
 
                 reply = client.recv(1024).decode(
                     "utf-8",

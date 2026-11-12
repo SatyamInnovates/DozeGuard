@@ -40,6 +40,7 @@ def send_command(command):
     try:
         client.connect(str(socket_path()))
         client.sendall(command.encode())
+        client.shutdown(socket.SHUT_WR)
         response = client.recv(1024)
         return response.decode()
     finally:

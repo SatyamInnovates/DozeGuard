@@ -11,6 +11,42 @@ from paths import socket_path, state_directory
 
 
 logger = logging.getLogger(__name__)
+MAX_COMMAND_SIZE = 1024
+CLIENT_READ_TIMEOUT = 1.0
+
+
+def receive_command(connection):
+    """Read one EOF-terminated IPC command, returning an error if invalid."""
+    chunks = []
+    size = 0
+    connection.settimeout(CLIENT_READ_TIMEOUT)
+
+    while True:
+        try:
+            chunk = connection.recv(min(4096, MAX_COMMAND_SIZE + 1 - size))
+        except socket.timeout:
+            if not chunks:
+                return None, "ERROR: Empty command"
+            return None, "ERROR: Incomplete command"
+
+        if not chunk:
+            if not chunks:
+                return None, "ERROR: Empty command"
+            break
+
+        chunks.append(chunk)
+        size += len(chunk)
+        if size > MAX_COMMAND_SIZE:
+            return None, "ERROR: Command too large"
+
+    try:
+        command = b"".join(chunks).decode("utf-8").strip()
+    except UnicodeDecodeError:
+        return None, "ERROR: Invalid command encoding"
+
+    if not command:
+        return None, "ERROR: Empty command"
+    return command, None
 
 def another_daemon_is_alive(path):
     probe = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -129,15 +165,9 @@ def start_daemon():
                 continue
 
             with connection:
-                data = connection.recv(1024)
-
-                if not data:
-                    continue
-
-                try:
-                    command = data.decode("utf-8").strip()
-                except UnicodeDecodeError:
-                    connection.sendall(b"ERROR: Invalid command encoding")
+                command, protocol_error = receive_command(connection)
+                if protocol_error:
+                    connection.sendall(protocol_error.encode())
                     continue
 
                 try:

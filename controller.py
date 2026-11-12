@@ -47,8 +47,10 @@ class Controller:
 
     def stop(self, reason="manual"):
         was_active = self.session.active
-        self.inhibitor.stop()
-        self.session.stop()
+        try:
+            self.inhibitor.stop()
+        finally:
+            self.session.stop()
         if was_active:                   
             logger.info("session stopped, reason=%s", reason)
 

@@ -49,7 +49,14 @@ def test_shutdown_replies_stops_controller_and_removes_socket(
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
         client.settimeout(2)
         client.connect(str(socket_file))
+        client.sendall(b"")
+        assert client.recv(1024).decode() == "ERROR: Empty command"
+
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+        client.settimeout(2)
+        client.connect(str(socket_file))
         client.sendall(b"shutdown")
+        client.shutdown(socket.SHUT_WR)
         response = client.recv(1024).decode()
 
     thread.join(timeout=2)
@@ -57,6 +64,57 @@ def test_shutdown_replies_stops_controller_and_removes_socket(
     assert not thread.is_alive()
     assert controller.stop_calls == 1
     assert not socket_file.exists()
+
+
+def test_empty_ipc_payload_returns_controlled_error():
+    client, server = socket.socketpair()
+    try:
+        # sendall(b"") sends no stream data; the bounded read must still end.
+        client.sendall(b"")
+        command, error = daemon.receive_command(server)
+        assert command is None
+        assert error == "ERROR: Empty command"
+    finally:
+        client.close()
+        server.close()
+
+
+def test_empty_ipc_payload_terminated_by_eof_returns_immediately():
+    client, server = socket.socketpair()
+    try:
+        client.shutdown(socket.SHUT_WR)
+        command, error = daemon.receive_command(server)
+        assert command is None
+        assert error == "ERROR: Empty command"
+    finally:
+        client.close()
+        server.close()
+
+
+def test_ipc_command_is_read_through_eof_and_decoded():
+    client, server = socket.socketpair()
+    try:
+        client.sendall(b"sta")
+        client.sendall(b"tus")
+        client.shutdown(socket.SHUT_WR)
+        command, error = daemon.receive_command(server)
+        assert command == "status"
+        assert error is None
+    finally:
+        client.close()
+        server.close()
+
+
+def test_oversized_ipc_command_is_rejected():
+    client, server = socket.socketpair()
+    try:
+        client.sendall(b"x" * (daemon.MAX_COMMAND_SIZE + 1))
+        command, error = daemon.receive_command(server)
+        assert command is None
+        assert error == "ERROR: Command too large"
+    finally:
+        client.close()
+        server.close()
 
 
 def test_shutdown_command_is_available_in_cli():

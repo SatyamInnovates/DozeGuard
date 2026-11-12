@@ -31,6 +31,24 @@ def test_stop_stops_session_and_inhibitor(monkeypatch):
     assert not c.session.is_active()
     assert stopped == [True]
 
+
+def test_stop_clears_session_when_inhibitor_release_fails(monkeypatch):
+    c = Controller()
+    c.session.start(minutes=30)
+
+    def failing_stop():
+        raise OSError("inhibitor release failed")
+
+    monkeypatch.setattr(c.inhibitor, "stop", failing_stop)
+
+    try:
+        c.stop()
+        assert False, "Expected OSError"
+    except OSError as error:
+        assert str(error) == "inhibitor release failed"
+
+    assert not c.session.is_active()
+
 def test_duplicate_start_does_not_start_inhibitor_twice(monkeypatch):
     c = Controller()
 
@@ -77,6 +95,3 @@ def test_timer_expiration_releases_inhibitor(monkeypatch):
 
     assert not c.is_active()
     assert stopped == [True]
-
-
-    
