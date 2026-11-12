@@ -80,10 +80,11 @@ jobs:
           apt-get install -y /tmp/dozeguard-v1-core.deb /tmp/dozeguard-v1-tray.deb
           dozeguard --help
           dozeguard-tray --help
+          xdg_config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
           dozeguard-tray --disable-autostart
-          grep -Fx 'Hidden=true' /root/.config/autostart/dozeguard-tray.desktop
+          grep -Fx 'Hidden=true' "$xdg_config_home/autostart/dozeguard-tray.desktop"
           dozeguard-tray --enable-autostart
-          grep -Fx 'Hidden=false' /root/.config/autostart/dozeguard-tray.desktop
+          grep -Fx 'Hidden=false' "$xdg_config_home/autostart/dozeguard-tray.desktop"
           python3 -c 'import main, daemon, controller, backends.linux, core.session'
           test -f /usr/share/applications/dozeguard-tray.desktop
           test -f /etc/xdg/autostart/dozeguard-tray.desktop
@@ -161,17 +162,23 @@ jobs:
       image: archlinux:latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Build, install, exercise, and remove Arch package
         run: |
           pacman -Syu --noconfirm base-devel git desktop-file-utils python python-pip python-build python-installer python-setuptools python-wheel python-psutil python-dbus-next pyside6
           desktop-file-validate dozeguard-tray.desktop dozeguard-tray-autostart.desktop
           useradd -m builder
-          mkdir -p /tmp/dozeguard
-          cp -a . /tmp/dozeguard/
           source_commit=$(git rev-parse HEAD)
-          sed -E "s/#commit=[0-9a-f]{40}/#commit=${source_commit}/" /tmp/dozeguard/PKGBUILD > /tmp/dozeguard/PKGBUILD.new
+          git clone --bare . /tmp/dozeguard-source.git
+          mkdir -p /tmp/dozeguard
+          git archive "$source_commit" | tar -x -C /tmp/dozeguard
+          sed -E \
+            -e 's|git\+https://github.com/SatyamInnovates/DozeGuard.git|git+file:///tmp/dozeguard-source.git|' \
+            -e "s|#commit=[0-9a-f]{40}|#commit=${source_commit}|" \
+            /tmp/dozeguard/PKGBUILD > /tmp/dozeguard/PKGBUILD.new
           mv /tmp/dozeguard/PKGBUILD.new /tmp/dozeguard/PKGBUILD
-          chown -R builder:builder /tmp/dozeguard
+          chown -R builder:builder /tmp/dozeguard /tmp/dozeguard-source.git
           runuser -u builder -- /bin/bash -ec 'cd /tmp/dozeguard && makepkg --syncdeps --noconfirm --cleanbuild'
           ! bsdtar -tf /tmp/dozeguard/dozeguard-1.0.0-1-any.pkg.tar.zst | grep -E 'dozeguard-tray.desktop|xdg/autostart'
           bsdtar -tf /tmp/dozeguard/dozeguard-tray-1.0.0-1-any.pkg.tar.zst | grep -F 'etc/xdg/autostart/dozeguard-tray.desktop'
