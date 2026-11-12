@@ -17,9 +17,25 @@ compatibility.
 
 The GitHub Actions workflow now defines distro test jobs and package
 build/install/remove jobs for Debian, Ubuntu, Fedora, and Arch, and source tests
-for openSUSE. Those GitHub Actions jobs have not yet run. The results above are
-local isolated-container checks plus the Phase 1 Fedora host test; they are not
-GitHub Actions results.
+for openSUSE. Those GitHub Actions jobs have not yet run. The table records
+earlier Phase 1/Phase 2 results; the current 1.0.0 tray package work is listed
+below and is also local validation, not a GitHub Actions result.
+
+## Current 1.0.0 tray and package validation
+
+The current working-tree snapshot passed 48 automated tests. Debian 13 and
+Ubuntu 24.04 core/tray DEBs built and passed isolated install, CLI, autostart
+override, and removal checks. The Fedora 44 core/tray RPMs built and their
+metadata and file ownership were inspected; they were not installed. Arch
+core/tray packages built from a local source snapshot and their package
+contents were inspected; package installation was not exercised. An initial
+Arch dependency sync timed out, then the package build succeeded with download
+timeouts disabled. GitHub Actions has not run for this working tree.
+
+Ubuntu 24.04 does not provide PySide6 in its standard archive. The tray DEB
+therefore recommends the distro binding when available; a per-user venv with
+the `[tray]` extra is the documented route on 24.04. The launcher can delegate
+to that venv. This path was smoke-tested headlessly, but not in a real desktop.
 
 ## Desktop, power, and hardware status
 
@@ -45,11 +61,10 @@ Package removal does not currently signal per-user daemons. Run
 stops the daemon, and removes its runtime socket. Package removal still retains
 user logs and state under XDG directories.
 
-The planned release version is 1.0.0. Historical validation entries above refer
-to packages built as version 0.1.0; they are not evidence that version 1.0.0
-packages have been built or installed. RPM and Arch recipes are pinned to source commit
-`1a74da5a27c86c9fe18c6fe4556091780bc64ee6`. Debian packages are built from the
-selected source checkout and have no separate source commit pin. Package
-version metadata is aligned to 1.0.0. Package build and installation results
-for this release source revision should be recorded separately from the
-historical Phase 2 validation above.
+The package metadata uses version 1.0.0. The fallback source pins in the RPM
+spec and PKGBUILD still identify the previously committed 1.0.0 source; the
+current tray changes are uncommitted and cannot yet be referenced by an exact
+source commit. CI builds from its checked-out commit. Before publishing the
+native recipes, update both fallback pins to the commit containing these tray
+and packaging changes. Debian builds use the selected source checkout and do
+not have a separate source pin.

@@ -1,3 +1,17 @@
 #!/usr/bin/make -f
 %:
 	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_install:
+	install -d debian/dozeguard/usr/lib/python3/dist-packages
+	if [ -d debian/tmp/usr/lib/python3/dist-packages ]; then \
+		cp -a debian/tmp/usr/lib/python3/dist-packages/. debian/dozeguard/usr/lib/python3/dist-packages/; \
+	else \
+		sites=$$(find debian/tmp/usr/lib -type d \( -name site-packages -o -name dist-packages \) -print); \
+		test -n "$$sites"; \
+		printf '%s\n' "$$sites" | while IFS= read -r site; do cp -a "$$site"/. debian/dozeguard/usr/lib/python3/dist-packages/; done; \
+	fi
+	rm -rf debian/tmp/usr/lib/python3/dist-packages debian/tmp/usr/lib/python3.*/dist-packages debian/tmp/usr/lib/python3.*/site-packages
+	find debian/dozeguard/usr/lib/python3/dist-packages -type d -name __pycache__ -prune -exec rm -rf {} +
+	install -Dpm0644 dozeguard-tray-autostart.desktop debian/dozeguard-tray/etc/xdg/autostart/dozeguard-tray.desktop
+	dh_install

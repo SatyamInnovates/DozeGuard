@@ -10,9 +10,18 @@ BuildRequires:  python3-setuptools
 Requires:       python3
 Requires:       python3-psutil
 Requires:       python3-dbus-next
-Suggests:       python3-pyside6
 Source0:        https://github.com/SatyamInnovates/DozeGuard/archive/%{sourcecommit}.tar.gz
 Source1:        dozeguard-tray.desktop
+Source2:        dozeguard-tray-autostart.desktop
+
+%package tray
+Summary:        Optional desktop tray and window for DozeGuard
+Requires:       %{name} = %{version}-%{release}
+Requires:       python3-pyside6
+
+%description tray
+DozeGuard tray controls sessions and displays their current status. This
+package also enables background login startup by default.
 
 %description
 DozeGuard temporarily inhibits system sleep while a user session is active.
@@ -26,15 +35,24 @@ Sleep inhibition currently requires systemd-logind.
 
 %install
 %pyproject_install
-%pyproject_save_files backends core main daemon controller paths tray
+%pyproject_save_files backends core main daemon controller paths tray desktop_integration
 install -Dpm0644 %{SOURCE1} %{buildroot}%{_datadir}/applications/dozeguard-tray.desktop
+install -Dpm0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/xdg/autostart/dozeguard-tray.desktop
 
 %files -f %{pyproject_files}
 %{_bindir}/dozeguard
-%{_bindir}/dozeguard-tray
+%exclude %{_bindir}/dozeguard-tray
+%exclude %{python3_sitelib}/__pycache__
+%exclude %{python3_sitelib}/*/__pycache__
+%exclude %{python3_sitelib}/__pycache__/*
+%exclude %{python3_sitelib}/*/__pycache__/*
 %license LICENSE
 %doc README.md
+
+%files tray
+%{_bindir}/dozeguard-tray
 %{_datadir}/applications/dozeguard-tray.desktop
+%{_sysconfdir}/xdg/autostart/dozeguard-tray.desktop
 
 %changelog
 * Thu Nov 12 2026 DozeGuard contributors <noreply@example.invalid> - 1.0.0-1

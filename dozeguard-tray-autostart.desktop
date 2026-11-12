@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=DozeGuard
+Comment=Keep this session awake
+Exec=dozeguard-tray --background
+TryExec=dozeguard-tray
+Terminal=false
+X-GNOME-Autostart-enabled=true
+X-DozeGuard-Managed=true

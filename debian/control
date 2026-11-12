@@ -14,3 +14,12 @@ Depends: ${python3:Depends}, ${misc:Depends}, python3-psutil, python3-dbus-next
 Description: Per-user Linux sleep inhibitor
  DozeGuard temporarily inhibits system sleep while a user session is active.
  Sleep inhibition currently requires systemd-logind.
+
+Package: dozeguard-tray
+Architecture: all
+Depends: ${misc:Depends}, dozeguard (= ${binary:Version})
+Recommends: python3-pyside6.qtwidgets
+Description: Optional desktop tray and window for DozeGuard
+ DozeGuard tray controls sessions and displays their current status.
+ This package also enables background login startup by default. Install
+ PySide6 from the distribution or with the project's optional tray extra.

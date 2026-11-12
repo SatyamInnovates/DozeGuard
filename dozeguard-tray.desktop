@@ -5,3 +5,4 @@ Comment=Keep this session awake
 Exec=dozeguard-tray
 Terminal=false
 Categories=Utility;
+StartupNotify=true

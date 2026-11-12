@@ -21,7 +21,7 @@ dozeguard = "main:main"
 dozeguard-tray = "tray:main"
 
 [tool.setuptools]
-py-modules = ["main", "daemon", "controller", "paths", "tray"]
+py-modules = ["main", "daemon", "controller", "paths", "tray", "desktop_integration"]
 
 [tool.setuptools.packages.find]
 include = ["backends*", "core*"]
