@@ -2,6 +2,6 @@
 Type=Application
 Name=DozeGuard
 Comment=Keep this session awake
-Exec=dozeguard-tray
+Exec=/home/satyamkumar/DozeGuard/.Doze-env/bin/dozeguard-tray
 Terminal=false
 Categories=Utility;

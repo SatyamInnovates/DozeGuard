@@ -33,7 +33,6 @@ def runtime_directory() -> Path:
                 return _private_directory(base / APP_NAME)
         except OSError:
             pass
-    # Private per-user fallback for sessions without XDG_RUNTIME_DIR.
     return _private_directory(Path.home() / ".local/run" / APP_NAME)
 
 
@@ -42,3 +41,6 @@ def socket_path() -> Path:
     if len(os.fsencode(path)) >= 104:
         raise RuntimeError("DozeGuard runtime socket path exceeds Unix socket limits")
     return path
+
+
+
