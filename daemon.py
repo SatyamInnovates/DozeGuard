@@ -1,4 +1,5 @@
 
+import fcntl
 import os
 import socket
 import sys
@@ -11,19 +12,21 @@ from paths import socket_path, state_directory
 
 
 logger = logging.getLogger(__name__)
+
 MAX_COMMAND_SIZE = 1024
 CLIENT_READ_TIMEOUT = 1.0
 
 
 def receive_command(connection):
-    
     chunks = []
     size = 0
     connection.settimeout(CLIENT_READ_TIMEOUT)
 
     while True:
         try:
-            chunk = connection.recv(min(4096, MAX_COMMAND_SIZE + 1 - size))
+            chunk = connection.recv(
+                min(4096, MAX_COMMAND_SIZE + 1 - size)
+            )
         except socket.timeout:
             if not chunks:
                 return None, "ERROR: Empty command"
@@ -36,6 +39,7 @@ def receive_command(connection):
 
         chunks.append(chunk)
         size += len(chunk)
+
         if size > MAX_COMMAND_SIZE:
             return None, "ERROR: Command too large"
 
@@ -46,7 +50,9 @@ def receive_command(connection):
 
     if not command:
         return None, "ERROR: Empty command"
+
     return command, None
+
 
 def another_daemon_is_alive(path):
     probe = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -67,9 +73,37 @@ def remove_stale_socket(path):
         info = path.lstat()
     except FileNotFoundError:
         return
+
     if not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.getuid():
-        raise RuntimeError(f"Refusing to remove unexpected socket path: {path}")
+        raise RuntimeError(
+            f"Refusing to remove unexpected socket path: {path}"
+        )
+
     path.unlink()
+
+
+def acquire_startup_lock():
+    lock_file = state_directory() / "daemon.lock"
+
+    lock_fd = os.open(
+        lock_file,
+        os.O_CREAT | os.O_RDWR,
+        0o600
+    )
+
+    try:
+        fcntl.flock(
+            lock_fd,
+            fcntl.LOCK_EX | fcntl.LOCK_NB
+        )
+    except BlockingIOError:
+        os.close(lock_fd)
+        sys.exit("DozeGuard daemon is already starting or running")
+    except Exception:
+        os.close(lock_fd)
+        raise
+
+    return lock_fd
 
 
 def handle_command(command, controller):
@@ -130,24 +164,40 @@ def handle_command(command, controller):
 def start_daemon():
     socket_file = socket_path()
     log_dir = state_directory()
+
     logging.basicConfig(
         filename=log_dir / "daemon.log",
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
-    if another_daemon_is_alive(socket_file):
-        sys.exit("DozeGuard daemon is already running")
 
-    remove_stale_socket(socket_file)
+    startup_lock_fd = acquire_startup_lock()
 
-    cleanup_orphans()
-
-    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    controller = Controller(battery_floor=30)
+    server = None
+    controller = None
+    socket_identity = None
 
     try:
+        if another_daemon_is_alive(socket_file):
+            sys.exit("DozeGuard daemon is already running")
+
+        remove_stale_socket(socket_file)
+        cleanup_orphans()
+
+        server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        controller = Controller(battery_floor=30)
+
         server.bind(str(socket_file))
+
+        # Record the identity of the socket created by this daemon.
+        socket_info = socket_file.lstat()
+        socket_identity = (
+            socket_info.st_dev,
+            socket_info.st_ino
+        )
+
         socket_file.chmod(0o600)
+
         server.listen()
         server.settimeout(1)
 
@@ -165,16 +215,21 @@ def start_daemon():
 
             with connection:
                 command, protocol_error = receive_command(connection)
+
                 if protocol_error:
                     connection.sendall(protocol_error.encode())
                     continue
 
                 try:
-                    response, should_shutdown = handle_command(command, controller)
+                    response, should_shutdown = handle_command(
+                        command,
+                        controller
+                    )
                 except Exception as error:
                     logger.exception("Command failed")
                     response, should_shutdown = (
-                        f"ERROR: {error}", False
+                        f"ERROR: {error}",
+                        False
                     )
 
                 connection.sendall(response.encode())
@@ -184,25 +239,49 @@ def start_daemon():
 
     finally:
         try:
-            controller.stop()
-        except Exception:
-            logger.exception("Failed to stop controller during daemon cleanup")
-        finally:
-            try:
-                server.close()
-            except OSError:
-                logger.exception("Failed to close daemon socket")
+            if controller is not None:
+                try:
+                    controller.stop()
+                except Exception:
+                    logger.exception(
+                        "Failed to stop controller during daemon cleanup"
+                    )
 
-            try:
-                info = socket_file.lstat()
-                if stat.S_ISSOCK(info.st_mode) and info.st_uid == os.getuid():
-                    socket_file.unlink()
-            except FileNotFoundError:
-                pass
-            except OSError:
-                logger.exception("Failed to remove daemon socket")
+            if server is not None:
+                try:
+                    server.close()
+                except OSError:
+                    logger.exception("Failed to close daemon socket")
+
+            # Remove the socket only if its identity still matches
+            # the socket created by this daemon.
+            if socket_identity is not None:
+                try:
+                    info = socket_file.lstat()
+
+                    current_identity = (
+                        info.st_dev,
+                        info.st_ino
+                    )
+
+                    if (
+                        stat.S_ISSOCK(info.st_mode)
+                        and info.st_uid == os.getuid()
+                        and current_identity == socket_identity
+                    ):
+                        socket_file.unlink()
+
+                except FileNotFoundError:
+                    pass
+                except OSError:
+                    logger.exception(
+                        "Failed to remove daemon socket"
+                    )
 
             logger.info("DozeGuard daemon stopped")
+
+        finally:
+            os.close(startup_lock_fd)
 
 
 if __name__ == "__main__":

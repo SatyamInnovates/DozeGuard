@@ -1,4 +1,3 @@
-"""Per-user runtime and state paths for DozeGuard."""
 import os
 import stat
 from pathlib import Path
