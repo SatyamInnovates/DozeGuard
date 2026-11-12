@@ -152,7 +152,11 @@ def test_autostart_desktop_entry_uses_background_mode():
 
 def test_packaging_metadata_keeps_pyside_optional():
     from pathlib import Path
-    import tomllib
+
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
 
     root = Path(__file__).parents[1]
     project = tomllib.loads((root / "pyproject.toml").read_text())["project"]
