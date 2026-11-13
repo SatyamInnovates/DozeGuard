@@ -14,6 +14,9 @@ With a simple desktop window, convenient system tray controls, and dedicated Lid
 
 <img width="1912" height="988" alt="image" src="https://github.com/user-attachments/assets/525ca985-bb0c-4af6-abd8-284dd850b8fd" />
 
+
+I built aLinux utility in Python that communicates with systemd-logind to prevent automatic system suspension, with a CLI and desktop tray interface.
+
 ## Features
 
 - **Lid Mode:** keep you laptop awake when lid is closed so your task can be complete.
