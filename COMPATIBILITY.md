@@ -1,70 +1,151 @@
-# Compatibility and validation status
+# Compatibility and Validation Status
 
-This report separates source tests, native package checks, and real desktop or
-hardware behavior. A passing package build does not establish suspend or tray
-compatibility.
+This document describes the testing and validation performed for DozeGuard.
 
-## Distribution status
+It separates automated source tests, native package validation, and real-world desktop and hardware testing. A successful package build does not automatically guarantee compatibility with every Linux desktop or laptop.
 
-| Distribution | Source tests | Native package validation | Status |
-|---|---|---|---|
-| Fedora | 29 tests passed on the Fedora 44 development host during Phase 1 | RPM built, dependency resolution checked, installed, CLI and imports checked, and removed in Fedora 45 container | Package build and basic lifecycle tested; not a Fedora desktop-session test |
-| Ubuntu 24.04 | Not run separately in Phase 2 | DEB built, dependencies resolved, installed, CLI and imports checked, desktop entry present, and removed | Package build and basic lifecycle tested |
-| Debian stable (13) | Not run separately in Phase 2 | DEB built, dependencies resolved, installed, CLI and imports checked, upgraded from 0.1.0-1 to 0.1.0-2, and removed | Package build and basic lifecycle tested |
-| Arch Linux | Not run separately in Phase 2 | PKGBUILD built from its pinned source commit, installed, CLI and imports checked, and removed | Package build and basic lifecycle tested; upgrade not exercised |
-| openSUSE Tumbleweed | 29 tests passed in a clean container using distro Python packages and a venv | RPM build attempted; failed because the openSUSE Python RPM macros selected Python 3.14 while the container's `python3-devel` resolved to Python 3.13 | Source tests pass; current RPM spec is Fedora-compatible but not openSUSE-buildable in this environment |
-| Linux Mint | Not tested directly | No native package build or install test | Untested; Ubuntu CI is not evidence of Mint compatibility |
+## Distribution Compatibility
 
-The GitHub Actions workflow now defines distro test jobs and package
-build/install/remove jobs for Debian, Ubuntu, Fedora, and Arch, and source tests
-for openSUSE. Those GitHub Actions jobs have not yet run. The table records
-earlier Phase 1/Phase 2 results; the current 1.0.0 tray package work is listed
-below and is also local validation, not a GitHub Actions result.
+| Distribution | Package format | Validation status |
+|---|---|---|
+| Fedora 44 | RPM | Manually tested |
+| Ubuntu 24.04 | DEB | Manually tested |
+| Ubuntu 26.04 | DEB | Manually tested |
+| Debian 13 (Stable) | DEB | Manually tested |
+| Arch Linux | Arch package | Not tested |
 
-## Current 1.0.0 tray and package validation
+### Fedora
 
-The current working-tree snapshot passed 48 automated tests. Debian 13 and
-Ubuntu 24.04 core/tray DEBs built and passed isolated install, CLI, autostart
-override, and removal checks. The Fedora 44 core/tray RPMs built and their
-metadata and file ownership were inspected; they were not installed. Arch
-core/tray packages built from a local source snapshot and their package
-contents were inspected; package installation was not exercised. An initial
-Arch dependency sync timed out, then the package build succeeded with download
-timeouts disabled. GitHub Actions has not run for this working tree.
+- Core and tray RPM packages built successfully.
+- Package installation and dependency resolution tested.
+- CLI commands verified.
+- Graphical application launched successfully.
+- Basic application functionality checked.
 
-Ubuntu 24.04 does not provide PySide6 in its standard archive. The tray DEB
-therefore recommends the distro binding when available; a per-user venv with
-the `[tray]` extra is the documented route on 24.04. The launcher can delegate
-to that venv. This path was smoke-tested headlessly, but not in a real desktop.
+### Ubuntu
 
-## Desktop, power, and hardware status
+- Core and tray DEB packages installed successfully.
+- Dependencies resolved through APT.
+- CLI commands and session functionality tested.
+- Graphical application launched successfully.
+- Tray interactions and autostart behavior tested.
 
-- KDE Plasma, GNOME, XFCE, and Cinnamon tray visibility, menus, notifications,
-  and startup behavior have not been tested in real sessions. No tray
-  compatibility claim is made for these desktops.
-- Sleep inhibition requires an accessible system D-Bus and
-  `systemd-logind`. Systems without logind, including non-systemd setups, are
-  unsupported for sleep prevention.
-- The tests mock logind and battery telemetry. Suspend prevention and battery
-  reporting on real laptop hardware have not been validated across the target
-  distributions.
-- Unknown battery telemetry permits a session and is shown as unknown. This
-  preserves the existing application policy.
+**Ubuntu 24.04 note:** PySide6 is not available through its standard repositories in the required form. A per-user virtual environment is available as an alternative for installing graphical support.
 
-## Package lifecycle limits
+### Debian
 
-Package tests check installation, command entry points, imports, desktop-entry
-placement, upgrade behavior where noted, and removal of package-owned files.
-They do not test uninstalling while a detached DozeGuard daemon is active.
-Package removal does not currently signal per-user daemons. Run
-`dozeguard shutdown` before uninstalling; this releases any active inhibitor,
-stops the daemon, and removes its runtime socket. Package removal still retains
-user logs and state under XDG directories.
+- Core and tray DEB packages installed successfully.
+- Dependencies resolved through APT.
+- CLI commands and session functionality tested.
+- Graphical application launched successfully.
+- Tray interactions and autostart behavior tested.
+- Installation and removal checked.
 
-The package metadata uses version 1.0.0. The fallback source pins in the RPM
-spec and PKGBUILD still identify the previously committed 1.0.0 source; the
-current tray changes are uncommitted and cannot yet be referenced by an exact
-source commit. CI builds from its checked-out commit. Before publishing the
-native recipes, update both fallback pins to the commit containing these tray
-and packaging changes. Debian builds use the selected source checkout and do
-not have a separate source pin.
+### Arch Linux
+
+<blockquote>**Not tested.** Arch Linux packages have not yet been validated on a real Arch Linux installation. Installation, upgrades, desktop integration, and runtime behavior remain unverified.</blockquote>
+
+The Arch package recipe exists, but its successful build alone should not be considered proof of runtime compatibility.
+
+## Automated Testing
+
+The automated test suite covers application logic, including:
+
+- Session management.
+- Daemon behavior.
+- IPC communication.
+- Sleep-inhibitor logic using mocked logind.
+- Battery telemetry handling.
+- Error handling and application behavior.
+
+The latest reported working-tree snapshot passed **48 automated tests**.
+
+These tests are not a substitute for testing actual sleep inhibition on physical hardware.
+
+## Desktop Environment Compatibility
+
+The graphical application requires PySide6 and a desktop environment that provides a compatible system tray host.
+
+The following desktop environments have not been comprehensively validated for tray visibility, menus, notifications, and startup behavior:
+
+- KDE Plasma
+- GNOME
+- XFCE
+- Cinnamon
+
+Tray behavior may vary depending on the desktop environment and its notification and system tray services.
+
+No universal desktop compatibility guarantee is currently made.
+
+## Sleep Inhibition and Lid Mode
+
+DozeGuard uses `systemd-logind` over the system D-Bus to request sleep inhibition.
+
+A working system bus and logind service are required.
+
+Systems without a working `systemd-logind` service are unsupported for sleep prevention.
+
+Lid Mode behavior also depends on:
+
+- Laptop hardware and firmware.
+- System power-management configuration.
+- The desktop environment.
+- Whether the system honors the requested sleep inhibitor during lid-close events.
+
+A sleep inhibitor cannot override every hardware-level or firmware-level power action.
+
+## Battery Handling
+
+Battery information is obtained through `psutil`.
+
+- When battery information is available, DozeGuard can report the detected battery state.
+- When battery information is unavailable, it reports the state as unknown.
+- Unknown battery telemetry does not prevent a session from starting.
+
+Battery reporting and low-battery behavior can vary between hardware and have not been comprehensively validated across all supported distributions.
+
+## Package Lifecycle
+
+Native package validation includes checks for:
+
+- Package installation.
+- Dependency resolution.
+- CLI entry points.
+- Python imports.
+- Desktop-entry placement.
+- Autostart configuration where tested.
+- Package removal.
+- Upgrade behavior where tested.
+
+Package removal does not currently stop an already-running per-user DozeGuard daemon.
+
+Before uninstalling, run:
+
+```bash
+dozeguard shutdown
+```
+
+This releases the active inhibitor, stops the existing daemon, and removes its runtime socket.
+
+User logs and state stored in XDG directories are retained after package removal.
+
+## Testing Limitations
+
+The following areas still require additional validation:
+
+- Real suspend prevention across different laptop models.
+- Lid-close behavior across different hardware and firmware configurations.
+- Tray integration across desktop environments.
+- Notifications and desktop startup behavior across different distributions.
+- Arch Linux installation and runtime behavior.
+- Package removal while a detached daemon is active.
+
+## Summary
+
+DozeGuard has been manually tested on Ubuntu, Fedora, and Debian.
+
+Arch Linux remains untested.
+
+Automated tests and package validation provide useful confidence, but actual sleep inhibition and lid behavior depend on the user's Linux environment and hardware.
+
+**Testing status will be updated as additional distributions and desktop configurations are validated.**
