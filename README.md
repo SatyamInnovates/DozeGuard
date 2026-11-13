@@ -251,7 +251,7 @@ DozeGuard prevents system suspend while an active sleep-inhibition session is ru
 
 The laptop should remain awake while the DozeGuard session is active.
 
-[GitHub Repository](https://github.com/SatyamInnovates/DozeGuard)
+
 
 
 The project is not yet complete there is many things to do like make it more reliable and also make it access for other OS.
