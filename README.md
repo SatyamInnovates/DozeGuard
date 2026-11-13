@@ -4,9 +4,9 @@
 
 DozeGuard is a Linux desktop application that keeps your computer awake when you need it most.
 
-Downloading large files? Running long-running tasks? Working with AI coding agents? DozeGuard helps keep everything running without your laptop automatically going to sleep.
+Downloading large files? Running long-running tasks? Working with AI coding agents? DozeGuard helps keep your work running without your laptop automatically going to sleep.
 
-Heading out? Start DozeGuard, close your laptop lid, put it in your bag, and let your coding agents keep working while you're on the move. Stay productive without having to keep your laptop open.
+Heading out? Start DozeGuard, activate Lid Mode, and close your laptop without automatically interrupting your running tasks. Your coding agents and background processes can keep working while you're away.
 
 With a simple desktop window, convenient system tray controls, and dedicated Lid Mode, DozeGuard puts you in control of when your laptop stays awake.
 
@@ -14,18 +14,21 @@ With a simple desktop window, convenient system tray controls, and dedicated Lid
 
 ## ✨ Features
 
-- **Lid Mode:** Keep your laptop awake when the lid is closed, subject to system power-management and hardware behavior.
+- **Lid Mode:** Keep your laptop awake when the lid is closed, subject to your system's power-management configuration and hardware.
 - **Keep Awake Mode:** Prevent automatic sleep for a selected duration or until you manually stop the session.
-- **Desktop Application:** Start and manage sessions through a straightforward graphical interface.
-- **System Tray:** Access DozeGuard while you work without keeping its main window open.
+- **Desktop Application:** Start and manage sessions through a simple graphical interface.
+- **System Tray:** Access DozeGuard while you work without keeping the main window open.
 - **Background Operation:** Close the application window while keeping DozeGuard accessible from the system tray.
+- **Battery Awareness:** Battery information is used when available. Unknown battery information does not prevent a session from starting.
 - **CLI Fallback:** Manage sessions from the terminal if the graphical interface is unavailable.
-- **Fully Reliable** I have tested it on other machines and even tested with battery fallback.(it stops working if your laptop get's too low)
+
 ## 🖥️ Compatibility
 
 DozeGuard uses `systemd-logind` through the system D-Bus to request sleep inhibition.
 
-A working system bus and logind service are required.
+A working system bus and logind service are required to start a session. Systems without a working logind service are not supported.
+
+### Tested distributions
 
 | Distribution | Status |
 |---|---|
@@ -36,9 +39,9 @@ A working system bus and logind service are required.
 
 The graphical application requires PySide6 and a desktop environment with a compatible system tray host.
 
-Tray behavior may vary depending on your desktop environment and its notification services.
+Tray behavior and notifications may vary depending on your desktop environment.
 
-But don't worry I have taken care of it.
+DozeGuard has been tested on multiple machines, but hardware and power-management behavior can differ between laptops.
 
 See [COMPATIBILITY.md](COMPATIBILITY.md) for more information.
 
@@ -46,14 +49,16 @@ See [COMPATIBILITY.md](COMPATIBILITY.md) for more information.
 
 Download the appropriate packages from the [GitHub Releases](https://github.com/SatyamInnovates/DozeGuard/releases) page.
 
-For the complete graphical experience, install both the core and tray packages.
+For the complete graphical experience, download and install both the **core** and **tray** packages.
+
+After downloading, extract the ZIP archive, open a terminal inside the extracted folder, and run the appropriate command below.
 
 ### Ubuntu / Debian
 
-Download the two `.deb` packages and install them:
+Download both `.deb` packages:
 
 ```bash
-sudo apt install ./dozeguard_*.deb ./dozeguard-tray_*.deb
+sudo apt install ./dozeguard_[0-9]*_all.deb ./dozeguard-tray_[0-9]*_all.deb
 ```
 
 ### Fedora
@@ -61,20 +66,20 @@ sudo apt install ./dozeguard_*.deb ./dozeguard-tray_*.deb
 Download both `.rpm` packages:
 
 ```bash
-sudo dnf install ./dozeguard-*.rpm ./dozeguard-tray-*.rpm
+sudo dnf install ./dozeguard-[0-9]*.rpm ./dozeguard-tray-*.rpm
 ```
 
 ### Arch Linux
 
-<blockquote>**Experimental — Not tested:** Arch Linux packages have not yet been tested on a real Arch Linux installation. Installation and runtime behavior are not guaranteed.</blockquote>
+<blockquote>**Experimental — Not tested:** Arch Linux packages have not yet been tested on a real Arch Linux installation. Installation and runtime behavior are not guaranteed. Use at your own discretion.</blockquote>
 
 Download both `.pkg.tar.zst` packages:
 
 ```bash
-sudo pacman -U ./dozeguard-*.pkg.tar.zst ./dozeguard-tray-*.pkg.tar.zst
+sudo pacman -U ./dozeguard-[0-9]*.pkg.tar.zst ./dozeguard-tray-*.pkg.tar.zst
 ```
 
-Check the filenames before installation to ensure you select the correct package versions.
+Check the downloaded filenames before installation to ensure you are selecting the correct package versions.
 
 ## 🚀 Getting Started
 
@@ -114,9 +119,11 @@ For example:
 
 - Continue downloads with the lid closed.
 - Keep long-running tasks active.
-- Leave background work running while your laptop is closed.
+- Leave coding agents and background processes running while you're away.
 
 Actual lid-close behavior depends on your system's power-management configuration, hardware, and firmware. DozeGuard cannot override every hardware-level power behavior.
+
+**Safety note:** A laptop that remains awake can generate heat. Avoid placing a running laptop inside an enclosed bag or other poorly ventilated space. Make sure it has adequate ventilation.
 
 ## ⌨️ CLI Fallback
 
@@ -158,12 +165,14 @@ The CLI works independently of the graphical application and does not require Py
 
 ## 🛠️ Install from Source
 
-For users who prefer installing directly from source, Python 3.10 or newer is required.
+**Note:** Native packages from GitHub Releases are the recommended installation method. Source installation is intended primarily for developers and advanced users.
+
+Python 3.10 or newer is required.
 
 Create a virtual environment:
 
 ```bash
-python3 -m venv ~/.venvs/dozeguard
+python3.11 -m venv ~/.venvs/dozeguard
 ```
 
 Install DozeGuard with graphical support:
@@ -224,6 +233,6 @@ dozeguard shutdown
 
 ---
 
-**DozeGuard** — Your laptop, your control.
+**DozeGuard — Your laptop, your control.**
 
 [GitHub Repository](https://github.com/SatyamInnovates/DozeGuard)
