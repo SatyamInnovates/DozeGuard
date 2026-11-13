@@ -81,7 +81,7 @@ sudo pacman -U ./dozeguard-[0-9]*.pkg.tar.zst ./dozeguard-tray-*.pkg.tar.zst
 
 Check the downloaded filenames before installation to ensure you are selecting the correct package versions.
 
-## 🚀 Getting Started
+## Let's start
 
 After installation, open **DozeGuard** from your desktop's Applications menu.
 
