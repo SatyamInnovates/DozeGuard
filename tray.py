@@ -1,13 +1,12 @@
-"""Optional PySide6 desktop frontend for DozeGuard."""
 
 from __future__ import annotations
-
 import argparse
 import os
 import socket
 import subprocess
 import sys
 from pathlib import Path
+
 from desktop_integration import TrayInstanceLock, set_autostart_enabled
 from paths import runtime_directory, socket_path
 
@@ -15,6 +14,7 @@ from paths import runtime_directory, socket_path
 def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="dozeguard-tray")
     mode = parser.add_mutually_exclusive_group()
+
     mode.add_argument(
         "--background",
         action="store_true",
@@ -30,6 +30,7 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="disable DozeGuard login autostart for this user",
     )
+
     return parser.parse_args(argv)
 
 
@@ -46,7 +47,6 @@ def query_status() -> str:
 
 
 def should_run_background(tray_available: bool) -> bool:
-    """A login launch should stay alive only when a tray host is available."""
     return tray_available
 
 
@@ -55,20 +55,27 @@ def should_show_window(background: bool) -> bool:
 
 
 def user_tray_venv_python() -> Path:
-    data_home = Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local/share")
+    data_home = Path(
+        os.environ.get("XDG_DATA_HOME") or Path.home() / ".local/share"
+    )
     return data_home / "dozeguard/tray-venv/bin/python"
 
 
 def _delegate_to_user_tray_venv(argv: list[str] | None) -> None:
     try:
-        import PySide6  # noqa: F401
+        import PySide6
         return
     except (ImportError, OSError):
         pass
 
     venv_python = user_tray_venv_python()
-    if not venv_python.is_file() or venv_python.resolve() == Path(sys.executable).resolve():
+
+    if (
+        not venv_python.is_file()
+        or venv_python.resolve() == Path(sys.executable).resolve()
+    ):
         return
+
     try:
         probe = subprocess.run(
             [str(venv_python), "-c", "from PySide6 import QtWidgets"],
@@ -78,10 +85,15 @@ def _delegate_to_user_tray_venv(argv: list[str] | None) -> None:
         )
     except OSError:
         return
+
     if probe.returncode == 0:
         forwarded = argv if argv is not None else sys.argv[1:]
+
         try:
-            os.execv(str(venv_python), [str(venv_python), "-m", "tray", *forwarded])
+            os.execv(
+                str(venv_python),
+                [str(venv_python), "-m", "tray", *forwarded],
+            )
         except OSError:
             return
 
@@ -94,20 +106,32 @@ def _run_command(args: tuple[str, ...]) -> tuple[str, bool]:
             text=True,
             check=False,
         )
-        message = result.stdout.strip() or result.stderr.strip() or "Command completed."
-        return message, result.returncode != 0 or "Battery too low" in message
+
+        message = (
+            result.stdout.strip()
+            or result.stderr.strip()
+            or "Command completed."
+        )
+
+        return (
+            message,
+            result.returncode != 0 or "Battery too low" in message,
+        )
+
     except OSError as error:
         return f"Unable to run DozeGuard command: {error}", True
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_arguments(argv)
+
     if args.enable_autostart or args.disable_autostart:
         try:
             path = set_autostart_enabled(args.enable_autostart)
         except (OSError, FileExistsError) as error:
             print(f"dozeguard-tray: {error}", file=sys.stderr)
             return 1
+
         state = "enabled" if args.enable_autostart else "disabled"
         print(f"DozeGuard autostart {state} for this user ({path}).")
         return 0
@@ -117,12 +141,17 @@ def main(argv: list[str] | None = None) -> int:
     try:
         lock = TrayInstanceLock.acquire(runtime_directory() / "tray.lock")
     except (OSError, RuntimeError) as error:
-        print(f"dozeguard-tray: cannot create the per-user tray lock: {error}", file=sys.stderr)
+        print(
+            f"dozeguard-tray: cannot create the per-user tray lock: {error}",
+            file=sys.stderr,
+        )
         return 1
+
     if lock is None:
         if args.background:
             print("DozeGuard tray is already running.")
             return 0
+
         return _run_qt(False, argv, allow_tray=False)
 
     try:
@@ -132,7 +161,10 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _run_qt(
-    background: bool, argv: list[str] | None, *, allow_tray: bool = True
+    background: bool,
+    argv: list[str] | None,
+    *,
+    allow_tray: bool = True,
 ) -> int:
     try:
         from PySide6.QtCore import QTimer
@@ -143,11 +175,13 @@ def _run_qt(
             QMainWindow,
             QMenu,
             QPushButton,
+            QComboBox,
             QSystemTrayIcon,
             QVBoxLayout,
             QWidget,
         )
-    except (ImportError, OSError) as error:
+
+    except (ImportError, OSError):
         print(
             "dozeguard-tray: the optional GUI requires PySide6. Install DozeGuard "
             "with its [tray] extra or the distribution's tray package.",
@@ -157,6 +191,7 @@ def _run_qt(
 
     app = QApplication([sys.argv[0]])
     app.setApplicationName("DozeGuard")
+
     tray_available = allow_tray and QSystemTrayIcon.isSystemTrayAvailable()
 
     if background and not should_run_background(tray_available):
@@ -164,17 +199,27 @@ def _run_qt(
         return 0
 
     tray = QSystemTrayIcon() if tray_available else None
+
     status_label = QLabel("Checking DozeGuard status…")
+
     window = QMainWindow()
     window.setWindowTitle("DozeGuard")
     window.resize(360, 250)
+
     central = QWidget()
     layout = QVBoxLayout(central)
+
     title = QLabel("DozeGuard")
     title.setStyleSheet("font-size: 22px; font-weight: bold;")
     layout.addWidget(title)
-    layout.addWidget(QLabel("Prevent your laptop from sleeping while you work."))
-    status_label.setStyleSheet("font-size: 15px; font-weight: bold; padding: 8px;")
+
+    layout.addWidget(
+        QLabel("Prevent your laptop from sleeping while you work.")
+    )
+
+    status_label.setStyleSheet(
+        "font-size: 15px; font-weight: bold; padding: 8px;"
+    )
     layout.addWidget(status_label)
 
     def notify(message: str, warning: bool) -> None:
@@ -193,14 +238,28 @@ def _run_qt(
         notify(message, warning)
         refresh()
 
-    for label, command in (
-        ("Start 30 min", ("start", "30")),
-        ("Start unlimited", ("start",)),
-        ("Stop", ("stop",)),
-    ):
-        button = QPushButton(label)
-        button.clicked.connect(lambda _checked=False, c=command: run_cli(*c))
-        layout.addWidget(button)
+    duration_combo = QComboBox()
+    duration_combo.addItem("15 minutes", 15)
+    duration_combo.addItem("30 minutes", 30)
+    duration_combo.addItem("45 minutes", 45)
+    duration_combo.addItem("1 hour", 60)
+    duration_combo.setCurrentIndex(1) 
+
+    layout.addWidget(duration_combo)
+
+    start_button = QPushButton("Start Session")
+    start_button.clicked.connect(
+        lambda: run_cli("start", str(duration_combo.currentData()))
+    )
+    layout.addWidget(start_button)
+    unlimited_button = QPushButton("Start unlimited")
+    unlimited_button.clicked.connect(lambda: run_cli("start"))
+    layout.addWidget(unlimited_button)
+
+    stop_button = QPushButton("Stop")
+    stop_button.clicked.connect(lambda: run_cli("stop"))
+    layout.addWidget(stop_button)
+
     window.setCentralWidget(central)
 
     def make_icon(color: str) -> QIcon:
@@ -210,50 +269,85 @@ def _run_qt(
 
     def refresh() -> None:
         reply = query_status()
+
         if "Status: Active" in reply:
-            title_text, status_color, icon_color = "ACTIVE", "#16a34a", "green"
+            title_text, status_color, icon_color = (
+                "ACTIVE",
+                "#16a34a",
+                "green",
+            )
         elif "not running" in reply.lower():
-            title_text, status_color, icon_color = "UNAVAILABLE", "#dc2626", "gray"
+            title_text, status_color, icon_color = (
+                "UNAVAILABLE",
+                "#dc2626",
+                "gray",
+            )
         else:
-            title_text, status_color, icon_color = "IDLE", "#d97706", "orange"
+            title_text, status_color, icon_color = (
+                "IDLE",
+                "#d97706",
+                "orange",
+            )
+
         status_label.setText(f"{title_text}\n{reply}")
         status_label.setStyleSheet(
             f"font-size: 15px; font-weight: bold; padding: 8px; color: {status_color};"
         )
+
         if tray is not None:
             tray.setIcon(make_icon(icon_color))
             tray.setToolTip(f"DozeGuard\n{reply}")
 
     if tray is not None:
         menu = QMenu()
+
         menu.addAction("Open DozeGuard").triggered.connect(window.show)
         menu.addSeparator()
-        menu.addAction("Start 30 min").triggered.connect(
-            lambda: run_cli("start", "30")
-        )
+        for label, minutes in [
+            ("15 minutes", 15),
+            ("30 minutes", 30),
+            ("45 minutes", 45),
+            ("1 hour", 60),
+        ]:
+            menu.addAction(f"Start {label}").triggered.connect(
+                lambda checked=False, m=minutes: run_cli("start", str(m))
+            )
+
         menu.addAction("Start unlimited").triggered.connect(
             lambda: run_cli("start")
         )
-        menu.addAction("Stop").triggered.connect(lambda: run_cli("stop"))
+
+        menu.addAction("Stop").triggered.connect(
+            lambda: run_cli("stop")
+        )
+
         menu.addSeparator()
+
         menu.addAction("Quit DozeGuard").triggered.connect(app.quit)
+
         tray.setContextMenu(menu)
+
         tray.activated.connect(
             lambda reason: window.show()
             if reason == QSystemTrayIcon.ActivationReason.Trigger
             else None
         )
+
         tray.show()
         app.setQuitOnLastWindowClosed(False)
+
     else:
         app.setQuitOnLastWindowClosed(True)
 
     timer = QTimer()
     timer.timeout.connect(refresh)
     timer.start(1000)
+
     refresh()
+
     if should_show_window(background):
         window.show()
+
     return app.exec()
 
 
