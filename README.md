@@ -103,7 +103,7 @@ DozeGuard can continue running in the background while you work.
 - Manage your active session.
 - Quit DozeGuard when you're finished.
 
-To launch directly in tray-only mode:
+If you want to launch directly in tray-only mode:
 
 ```bash
 dozeguard-tray --background
