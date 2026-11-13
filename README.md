@@ -171,7 +171,7 @@ The CLI works independently of the graphical application and does not require Py
 
 ## 🛠️ Install from Source
 
-**Note:** Packages from GitHub Releases are the recommended installation method. Source installation is intended primarily for developers as it can cause bugs and you need to solve themm.
+**Note:** Packages from GitHub Releases are the recommended installation method. Source installation is only for developers.
 
 Python 3.10 or newer is required.
 
@@ -181,7 +181,7 @@ Create a virtual environment:
 python3.11 -m venv ~/.venvs/dozeguard
 ```
 
-Install DozeGuard with graphical support:
+Install DozeGuard with gui:
 
 ```bash
 ~/.venvs/dozeguard/bin/pip install '.[tray]'
@@ -211,7 +211,7 @@ Automated tests use mocked logind and battery hardware. Actual sleep-inhibition 
 
 ## 🗑️ Uninstallation
 
-Remove DozeGuard using your distribution's package manager.
+Remove DozeGuard.
 
 **Ubuntu / Debian**
 
@@ -243,4 +243,4 @@ dozeguard shutdown
 [GitHub Repository](https://github.com/SatyamInnovates/DozeGuard)
 
 
-
+The project is not yet complete there is many things to do like make it more reliable and also make it access for other OS.
