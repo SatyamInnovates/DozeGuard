@@ -12,17 +12,19 @@ With a simple desktop window, convenient system tray controls, and dedicated Lid
 
 **Close the lid. Keep the work going.**
 
-## ✨ Features
+<img width="1912" height="988" alt="image" src="https://github.com/user-attachments/assets/525ca985-bb0c-4af6-abd8-284dd850b8fd" />
 
-- **Lid Mode:** Keep your laptop awake when the lid is closed, subject to your system's power-management configuration and hardware.
+## Features
+
+- **Lid Mode:**keep you laptop awake when lid is closed so your task can be complete.
 - **Keep Awake Mode:** Prevent automatic sleep for a selected duration or until you manually stop the session.
-- **Desktop Application:** Start and manage sessions through a simple graphical interface.
-- **System Tray:** Access DozeGuard while you work without keeping the main window open.
-- **Background Operation:** Close the application window while keeping DozeGuard accessible from the system tray.
-- **Battery Awareness:** Battery information is used when available. Unknown battery information does not prevent a session from starting.
-- **CLI Fallback:** Manage sessions from the terminal if the graphical interface is unavailable.
+- **Desktop Application:** Start and manage sessions through a simple app.
+- **System Tray:** A small sqaure box will appear in your task manager or panel(if you have one).
+- **Background Operation:** You don't need to open the app for it to be working it works on background
+- **Battery Awareness:** Battery information is used for safety. Unknown battery information does not prevent a session from starting.
+- **CLI Fallback:** Manage things from terminal if the graphical interface is unavailable.
 
-## 🖥️ Compatibility
+## Compatibility
 
 DozeGuard uses `systemd-logind` through the system D-Bus to request sleep inhibition.
 
@@ -37,25 +39,26 @@ A working system bus and logind service are required to start a session. Systems
 | Debian | Tested |
 | Arch Linux | Not tested |
 
-The graphical application requires PySide6 and a desktop environment with a compatible system tray host.
+important: I have not tested it on Arch because of some issues so there can be bugs so use the ones which is tested.
+
+The graphical application requires PySide6 and a desktop environment with a compatible system tray host.(package will install all of these)
 
 Tray behavior and notifications may vary depending on your desktop environment.
 
-DozeGuard has been tested on multiple machines, but hardware and power-management behavior can differ between laptops.
 
 See [COMPATIBILITY.md](COMPATIBILITY.md) for more information.
 
 ## 📦 Installation
 
-Download the appropriate packages from the [GitHub Releases](https://github.com/SatyamInnovates/DozeGuard/releases) page.
+Download the package from the [GitHub Releases](https://github.com/SatyamInnovates/DozeGuard/releases).
 
-For the complete graphical experience, download and install both the **core** and **tray** packages.
+Only install the file which is for your Distro.
 
-After downloading, extract the ZIP archive, open a terminal inside the extracted folder, and run the appropriate command below.
+After downloading, extract the ZIP archive, open a terminal inside the extracted folder, and run command below.
 
 ### Ubuntu / Debian
 
-Download both `.deb` packages:
+Download `.deb` package:
 
 ```bash
 sudo apt install ./dozeguard_[0-9]*_all.deb ./dozeguard-tray_[0-9]*_all.deb
@@ -71,19 +74,19 @@ sudo dnf install ./dozeguard-[0-9]*.rpm ./dozeguard-tray-*.rpm
 
 ### Arch Linux
 
-<blockquote>**Experimental — Not tested:** Arch Linux packages have not yet been tested on a real Arch Linux installation. Installation and runtime behavior are not guaranteed. Use at your own discretion.</blockquote>
+<blockquote>**Experimental — Not tested:** Arch Linux packages have not been tested on a real Arch Linux. i don't guarantee if the installation will be smooth. Use at your own discretion.</blockquote>
 
-Download both `.pkg.tar.zst` packages:
+Download `.pkg.tar.zst` package:
 
 ```bash
 sudo pacman -U ./dozeguard-[0-9]*.pkg.tar.zst ./dozeguard-tray-*.pkg.tar.zst
 ```
 
-Check the downloaded filenames before installation to ensure you are selecting the correct package versions.
-
 ## Let's start
 
 After installation, open **DozeGuard** from your desktop's Applications menu.
+
+Or
 
 You can also launch it using:
 
@@ -91,17 +94,21 @@ You can also launch it using:
 dozeguard-tray
 ```
 
-The main window opens, and DozeGuard attempts to provide a system tray icon when a compatible tray host is available.
+The main window appears from where when you first start a session the system tray icon will also come in the taskbar or panel and from there you can control it without opening the window.
 
-From the application, you can manage your keep-awake sessions and use Lid Mode.
+From the application, you can manage your keep-awake sessions.
 
 ### System Tray
+<img width="336" height="192" alt="image" src="https://github.com/user-attachments/assets/13a75fc2-0c4d-4cdb-8e4c-78776fddbe3d" />
+
 
 DozeGuard can continue running in the background while you work.
 
-- Open the main window from the tray.
+- Right click on the square box.
 - Manage your active session.
 - Quit DozeGuard when you're finished.
+
+It will be yellow when session isn't working and turn into green when session is working.
 
 If you want to launch directly in tray-only mode:
 
@@ -115,19 +122,18 @@ dozeguard-tray --background
 
 Lid Mode is designed for situations where you want to close your laptop without automatically interrupting an active task.
 
-For example:
+You don't have to enable it. It's already enabled
 
+For example:
 - Continue downloads with the lid closed.
 - Keep long-running tasks active.
 - Leave coding agents and background processes running while you're away.
 
 Actual lid-close behavior depends on your system's power-management configuration, hardware, and firmware. DozeGuard cannot override every hardware-level power behavior.
 
-**Safety note:** A laptop that remains awake can generate heat. Avoid placing a running laptop inside an enclosed bag or other poorly ventilated space. Make sure it has adequate ventilation.
-
 ## ⌨️ CLI Fallback
 
-The graphical application is the primary way to use DozeGuard, but a command-line interface is also available.
+The graphical application is the best way to use DozeGuard, but a command-line interface is also available.
 
 If the graphical interface or system tray is unavailable, you can still manage sessions from the terminal.
 
@@ -165,7 +171,7 @@ The CLI works independently of the graphical application and does not require Py
 
 ## 🛠️ Install from Source
 
-**Note:** Native packages from GitHub Releases are the recommended installation method. Source installation is intended primarily for developers and advanced users.
+**Note:** Packages from GitHub Releases are the recommended installation method. Source installation is intended primarily for developers as it can cause bugs and you need to solve themm.
 
 Python 3.10 or newer is required.
 
@@ -233,6 +239,8 @@ dozeguard shutdown
 
 ---
 
-**DozeGuard — Your laptop, your control.**
 
 [GitHub Repository](https://github.com/SatyamInnovates/DozeGuard)
+
+
+
