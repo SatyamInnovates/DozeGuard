@@ -28,6 +28,8 @@ With a simple desktop window, convenient system tray controls, and dedicated Lid
 
 DozeGuard uses `systemd-logind` through the system D-Bus to request sleep inhibition.
 
+It is developed in Fedora 44 KDE so if you use Fedora it will be the best.
+
 A working system bus and logind service are required to start a session. Systems without a working logind service are not supported.
 
 ### Tested distributions
