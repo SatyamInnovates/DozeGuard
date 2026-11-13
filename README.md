@@ -16,7 +16,7 @@ With a simple desktop window, convenient system tray controls, and dedicated Lid
 
 ## Features
 
-- **Lid Mode:**keep you laptop awake when lid is closed so your task can be complete.
+- **Lid Mode:** keep you laptop awake when lid is closed so your task can be complete.
 - **Keep Awake Mode:** Prevent automatic sleep for a selected duration or until you manually stop the session.
 - **Desktop Application:** Start and manage sessions through a simple app.
 - **System Tray:** A small sqaure box will appear in your task manager or panel(if you have one).
@@ -241,6 +241,15 @@ dozeguard shutdown
 
 ---
 
+
+##important:
+### Screen Lock vs. System Suspend
+
+DozeGuard prevents system suspend while an active sleep-inhibition session is running.
+
+**Important:** Your screen may still dim, turn off, or lock automatically according to your desktop environment's power-management settings. This does not mean the laptop has entered system suspend.
+
+The laptop should remain awake while the DozeGuard session is active.
 
 [GitHub Repository](https://github.com/SatyamInnovates/DozeGuard)
 
