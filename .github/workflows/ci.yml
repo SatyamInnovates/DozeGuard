@@ -173,7 +173,18 @@ jobs:
           useradd -m builder
           repo_dir="${GITHUB_WORKSPACE:?GITHUB_WORKSPACE is required}"
           test -f "$repo_dir/PKGBUILD"
-          tar -C "$repo_dir" --exclude=.git --transform='s|^\./|dozeguard/|' -czf /tmp/dozeguard-source.tar.gz .
+          tar -C "$repo_dir" \
+            --exclude=.git \
+            --exclude=.Doze-env \
+            --exclude=.venv \
+            --exclude=build \
+            --exclude=dist \
+            --exclude=.pytest_cache \
+            --exclude='*.egg-info' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --transform='s|^\./|dozeguard/|' \
+            -czf /tmp/dozeguard-source.tar.gz .
           mkdir -p /tmp/dozeguard
           cp "$repo_dir/PKGBUILD" /tmp/dozeguard/PKGBUILD
           sed -E \
