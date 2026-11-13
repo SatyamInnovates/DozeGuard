@@ -188,7 +188,7 @@ jobs:
           mkdir -p /tmp/dozeguard
           cp "$repo_dir/PKGBUILD" /tmp/dozeguard/PKGBUILD
           sed -E \
-            -e 's|^source=.*$|source=("$pkgbase::file:///tmp/dozeguard-source.tar.gz")|' \
+            -e 's|^source=.*$|source=("dozeguard-source.tar.gz::file:///tmp/dozeguard-source.tar.gz")|'
             /tmp/dozeguard/PKGBUILD > /tmp/dozeguard/PKGBUILD.new
           mv /tmp/dozeguard/PKGBUILD.new /tmp/dozeguard/PKGBUILD
           chown -R builder:builder /tmp/dozeguard
