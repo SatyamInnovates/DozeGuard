@@ -38,6 +38,8 @@ The graphical application requires PySide6 and a desktop environment with a comp
 
 Tray behavior may vary depending on your desktop environment and its notification services.
 
+But don't worry I have taken care of it.
+
 See [COMPATIBILITY.md](COMPATIBILITY.md) for more information.
 
 ## 📦 Installation
