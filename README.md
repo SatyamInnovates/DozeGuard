@@ -255,6 +255,18 @@ DozeGuard prevents system suspend while an active sleep-inhibition session is ru
 The laptop should remain awake while the DozeGuard session is active.
 
 
+**Proof of work**
+
+### Lid-Close Sleep Prevention Test
+
+I tested it.
+
+- **DozeGuard ON:** Laptop lid closed for 10 minutes; background loop continued running.
+- **DozeGuard OFF:** Laptop lid closed for around 2 minutes and few seconds; background loop showed a -2m 54s timestamp gap.
+
+So basically it worked great.
+
+
 
 
 The project is not yet complete there is many things to do like make it more reliable and also make it access for other OS.
