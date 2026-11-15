@@ -2,13 +2,15 @@
 
 **Keep your Linux laptop awake. Even with the lid closed.**
 
-DozeGuard is a Linux desktop application that keeps your computer awake when you need it most.
+DozeGuard is a Linux desktop application that keeps your computer awake whenever you want.
 
-Downloading large files? Running long-running tasks? Working with AI coding agents? DozeGuard helps keep your work running without your laptop automatically going to sleep.
+it is mainly designed for long tasks like downloading a game, or a agent working and a lot of things.
 
+I noticed a problem where while my agent is working or my games are downloading it takes time till then I go somewhere and laptop sleeps and the work gets disrupt
 Heading out? Start DozeGuard, activate Lid Mode, and close your laptop without automatically interrupting your running tasks. Your coding agents and background processes can keep working while you're away.
 
 With a simple desktop window, convenient system tray controls, and dedicated Lid Mode, DozeGuard puts you in control of when your laptop stays awake.
+
 
 **Close the lid. Keep the work going.**
 
