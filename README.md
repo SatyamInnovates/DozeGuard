@@ -9,7 +9,7 @@ it is mainly designed for long tasks like downloading a game, or a agent working
 I noticed a problem where while my agent is working or my games are downloading it takes time till then I go somewhere and laptop sleeps and the work gets disrupt
 Heading out? Start DozeGuard, activate Lid Mode, and close your laptop without automatically interrupting your running tasks. Your coding agents and background processes can keep working while you're away.
 
-With a simple desktop window, convenient system tray controls, and dedicated Lid Mode, DozeGuard puts you in control of when your laptop stays awake.
+With a simple desktop window, convenient system tray controls, and dedicated Lid Mode, DozeGuard puts you in control and solved these questions.
 
 
 **Close the lid. Keep the work going.**
@@ -17,7 +17,7 @@ With a simple desktop window, convenient system tray controls, and dedicated Lid
 <img width="1912" height="988" alt="image" src="https://github.com/user-attachments/assets/525ca985-bb0c-4af6-abd8-284dd850b8fd" />
 
 
-I built aLinux utility in Python that communicates with systemd-logind to prevent automatic system suspension, with a CLI and desktop tray interface.
+I built Linux utility in Python that communicates with systemd-logind to prevent automatic system suspension, with a CLI and desktop tray interface.
 
 ## Features
 
@@ -59,9 +59,9 @@ See [COMPATIBILITY.md](COMPATIBILITY.md) for more information.
 
 Download the package from the [GitHub Releases](https://github.com/SatyamInnovates/DozeGuard/releases).
 
-Only install the file which is for your Distro.
+Only install the file which is for your distro.(eg: rpm files is for fedora)
 
-After downloading, extract the ZIP archive, open a terminal inside the extracted folder, and run command below.
+After downloading, extract the ZIP folder then  open your terminal inside the extracted folder and run command some installation commands given below.
 
 ### Ubuntu / Debian
 
@@ -70,6 +70,7 @@ Download `.deb` package:
 ```bash
 sudo apt install ./dozeguard_[0-9]*_all.deb ./dozeguard-tray_[0-9]*_all.deb
 ```
+Then it will ask for confirmation and you just to select Y.
 
 ### Fedora
 
@@ -78,10 +79,11 @@ Download both `.rpm` packages:
 ```bash
 sudo dnf install ./dozeguard-[0-9]*.rpm ./dozeguard-tray-*.rpm
 ```
+It's an rpm package so you can uninstall it also with one command.
 
 ### Arch Linux
 
-<blockquote>**Experimental — Not tested:** Arch Linux packages have not been tested on a real Arch Linux. i don't guarantee if the installation will be smooth. Use at your own discretion.</blockquote>
+<blockquote>**Not tested yet:** Arch Linux packages have not been tested on a real Arch Linux. i don't guarantee if the installation will be smooth.</blockquote>
 
 Download `.pkg.tar.zst` package:
 
@@ -95,13 +97,14 @@ After installation, open **DozeGuard** from your desktop's Applications menu.
 
 Or
 
-You can also launch it using:
+(Now you can use DozeGuard from your root, you won't have to open the extrated folder terminal to use it)
+You can also launch it using below command from your terminal:
 
 ```bash
 dozeguard-tray
 ```
 
-The main window appears from where when you first start a session the system tray icon will also come in the taskbar or panel and from there you can control it without opening the window.
+After launching the app or useing the above command you will get a DozeGuard window and also a icon in your task-bar from where you can control the DozeGaurd.
 
 From the application, you can manage your keep-awake sessions.
 
@@ -109,7 +112,7 @@ From the application, you can manage your keep-awake sessions.
 <img width="336" height="192" alt="image" src="https://github.com/user-attachments/assets/13a75fc2-0c4d-4cdb-8e4c-78776fddbe3d" />
 
 
-DozeGuard can continue running in the background while you work.
+DozeGuard runs in the background while you work.
 
 - Right click on the square box.
 - Manage your active session.
@@ -127,7 +130,8 @@ dozeguard-tray --background
 
 **Close your laptop. Keep your work running.**
 
-Lid Mode is designed for situations where you want to close your laptop without automatically interrupting an active task.
+Lid Mode is designed for situations where you want to close your laptop lid without interferring your tasks.
+
 
 You don't have to enable it. It's already enabled
 
@@ -138,11 +142,13 @@ For example:
 
 Actual lid-close behavior depends on your system's power-management configuration, hardware, and firmware. DozeGuard cannot override every hardware-level power behavior.
 
+It can be very useful as when you are travelling somewhere then you can start the session close the lid and keep in your bag it will work fine!!
+
 ## ⌨️ CLI Fallback
 
-The graphical application is the best way to use DozeGuard, but a command-line interface is also available.
+The graphical application is the best way to use DozeGuard, but a command-line interface is also available(if GUI get's doesn't work).
 
-If the graphical interface or system tray is unavailable, you can still manage sessions from the terminal.
+If the DozeGuard window or system tray is unavailable, you can still manage sessions from the terminal.
 
 Start a 30-minute session:
 
@@ -178,7 +184,7 @@ The CLI works independently of the graphical application and does not require Py
 
 ## 🛠️ Install from Source
 
-**Note:** Packages from GitHub Releases are the recommended installation method. Source installation is only for developers.
+**Note:** Packages from GitHub Releases are the best way to install as it's very easy. Source installation is only for developers.
 
 Python 3.10 or newer is required.
 
@@ -200,7 +206,7 @@ For CLI-only installation:
 ~/.venvs/dozeguard/bin/pip install .
 ```
 
-## 🧪 Development
+##  Development
 
 Install development dependencies:
 
@@ -216,9 +222,11 @@ python3 -m pytest
 
 Automated tests use mocked logind and battery hardware. Actual sleep-inhibition and desktop behavior require testing on a running Linux system.
 
-## 🗑️ Uninstallation
+## Uninstallation
 
-Remove DozeGuard.
+Remove DozeGuard from your device.
+
+Open  terminal and run below command.
 
 **Ubuntu / Debian**
 
@@ -252,7 +260,7 @@ dozeguard shutdown
 
 DozeGuard prevents system suspend while an active sleep-inhibition session is running.
 
-**Important:** Your screen may still dim, turn off, or lock automatically according to your desktop environment's power-management settings. This does not mean the laptop has entered system suspend.
+**Important:** Your screen may still dim, turn off, or lock automatically according to your desktop environment's power-management settings. This does not mean the laptop has stopped the task and sleep.
 
 The laptop should remain awake while the DozeGuard session is active.
 
