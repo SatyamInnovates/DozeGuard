@@ -47,13 +47,9 @@ Instead of permanently changing my power settings, I can control when I want my 
 
 Also It's not recommended to change these settings.
 
-**The idea is simple: control when your laptop stays awake, rather than changing how it behaves all the time.**
-
 ## Compatibility
 
 DozeGuard uses `systemd-logind` through the system D-Bus to request sleep inhibition.
-
-It is developed in Fedora 44 KDE so if you use Fedora it will be the best.
 
 A working system bus and logind service are required to start a session. Systems without a working logind service are not supported.
 
@@ -70,7 +66,7 @@ important: I have not tested it on Arch because of some issues so there can be b
 
 The graphical application requires PySide6 and a desktop environment with a compatible system tray host.(package will install all of these)
 
-Tray behavior and notifications may vary depending on your desktop environment.
+Tray behavior can be little different in other distross then the ones which are supported
 
 
 See [COMPATIBILITY.md](COMPATIBILITY.md) for more information.
@@ -120,6 +116,7 @@ After installation, open **DozeGuard** from your desktop's Applications menu.
 Or
 
 (Now you can use DozeGuard from your root, you won't have to open the extrated folder terminal to use it)
+
 You can also launch it using below command from your terminal:
 
 ```bash
@@ -166,11 +163,13 @@ Actual lid-close behavior depends on your system's power-management configuratio
 
 It can be very useful as when you are travelling somewhere then you can start the session close the lid and keep in your bag it will work fine!!
 
-## ⌨️ CLI Fallback
+## CLI Fallback
 
 The graphical application is the best way to use DozeGuard, but a command-line interface is also available(if GUI get's doesn't work).
 
 If the DozeGuard window or system tray is unavailable, you can still manage sessions from the terminal.
+
+Open the terminal of your device and there are only 5 commands to use this.
 
 Start a 30-minute session:
 
