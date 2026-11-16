@@ -161,7 +161,7 @@ For example:
 
 Actual lid-close behavior depends on your system's power-management configuration, hardware, and firmware. DozeGuard cannot override every hardware-level power behavior.
 
-It can be very useful as when you are travelling somewhere then you can start the session close the lid and keep in your bag it will work fine!!
+It can be very useful as when you are travelling somewhere then you can start the session close the lid and keep in your bag it will work fine!!(without ventilation laptops can get heat)
 
 ## CLI Fallback
 
