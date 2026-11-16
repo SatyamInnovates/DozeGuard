@@ -10,7 +10,7 @@ it is mainly designed for long tasks like downloading a game, or a agent working
 
 I noticed a problem where while my agent is working or my games are downloading it takes time till then I go somewhere and laptop sleeps and the work gets disrupt but changing system settings are not recommended.
 
-Heading out? Start DozeGuard, activate Lid Mode, and close your laptop without automatically interrupting your running tasks. Your coding agents and background processes can keep working while you're away.
+Start the DozeGuard and be free to go anywhere or work other things your tasks must be done.
 
 With a simple desktop window, convenient system tray controls, and dedicated Lid Mode, DozeGuard puts you in control and solved these questions.
 
