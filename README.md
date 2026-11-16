@@ -81,9 +81,11 @@ Download the package from the [GitHub Releases](https://github.com/SatyamInnovat
 
 Only install the file which is for your distro.(eg: rpm files is for fedora)
 
-After downloading, extract the ZIP folder then  open your terminal inside the extracted folder and run command some installation commands given below.
+After downloading, extract the ZIP folder then  open your terminal inside the extracted folder and run command installation commands given below.
 
 ### Ubuntu / Debian
+
+For these two distros you have to install the .deb package
 
 Download `.deb` package:
 
