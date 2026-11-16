@@ -1,10 +1,11 @@
 # DozeGuard
 
-**Keep your Linux laptop awake. Even with the lid closed.**
+**Keep your Linux laptop awake. Even when your lid closed.**
 
 DozeGuard is a Linux desktop application that keeps your computer awake whenever you want.
 
-it is mainly designed for long tasks like downloading a game, or a agent working and a lot of things.
+Is is mainly desgined for long running tasks so you can do other stuff or be while your ai agents work or a game downloads!
+
 
 **Why i build DozeGuard**
 
@@ -12,25 +13,24 @@ I noticed a problem where while my agent is working or my games are downloading 
 
 Start the DozeGuard and be free to go anywhere or work other things your tasks must be done.
 
-With a simple desktop window, convenient system tray controls, and dedicated Lid Mode, DozeGuard puts you in control and solved these questions.
+With a simple desktop window ,icon on task bar and DozeGuard puts you in control and help you.
 
 
-**Close the lid. Keep the work going.**
 
 <img width="1912" height="988" alt="image" src="https://github.com/user-attachments/assets/525ca985-bb0c-4af6-abd8-284dd850b8fd" />
 
 
-I built Linux utility in Python that communicates with systemd-logind to prevent automatic system suspension, with a CLI and desktop tray interface
+I build it in Python that communicates with systemd-logind to prevent automatic sleep.
 
 
 ## Features
 
-- **Lid Mode:** keep you laptop awake when lid is closed so your task can be complete.
+- **Lid Mode:** You can keep your lid even closed and your laptop will work.
 - **Keep Awake Mode:** Prevent automatic sleep for a selected duration or until you manually stop the session.
 - **Desktop Application:** Start and manage sessions through a simple app.
 - **System Tray:** A small sqaure box will appear in your task manager or panel(if you have one).
-- **Background Operation:** You don't need to open the app for it to be working it works on background
-- **Battery Awareness:** Battery information is used for safety. Unknown battery information does not prevent a session from starting.
+- **Background Operation:** You don't need to open the app for it to be working it works on background.
+- **Battery Awareness:** Battery information is used for safety. if something breaks or your laptop battery too low it won't start or stop the session.
 - **CLI Fallback:** Manage things from terminal if the graphical interface is unavailable.
 
 ## Why DozeGuard instead of changing system settings?
@@ -51,7 +51,7 @@ Also It's not recommended to change these settings.
 
 DozeGuard uses `systemd-logind` through the system D-Bus to request sleep inhibition.
 
-A working system bus and logind service are required to start a session. Systems without a working logind service are not supported.
+Systems without a working logind service are not supported.
 
 ### Tested distributions
 
@@ -62,7 +62,7 @@ A working system bus and logind service are required to start a session. Systems
 | Debian | Tested |
 | Arch Linux | Not tested |
 
-important: I have not tested it on Arch because of some issues so there can be bugs so use the ones which is tested.
+important: I have not tested it on Arch because of some issues, so there can be bugs so use the ones which is tested.
 
 The graphical application requires PySide6 and a desktop environment with a compatible system tray host.(package will install all of these)
 
@@ -152,14 +152,14 @@ dozeguard-tray --background
 Lid Mode is designed for situations where you want to close your laptop lid without interferring your tasks.
 
 
-You don't have to enable it. It's already enabled
+It's already enabled but you can't disable it :( will work on that.
 
 For example:
 - Continue downloads with the lid closed.
 - Keep long-running tasks active.
 - Leave coding agents and background processes running while you're away.
 
-Actual lid-close behavior depends on your system's power-management configuration, hardware, and firmware. DozeGuard cannot override every hardware-level power behavior.
+Actual lid-close behavior depends on your system's power-management configuration, hardware, and firmware.
 
 It can be very useful as when you are travelling somewhere then you can start the session close the lid and keep in your bag it will work fine!!(without ventilation laptops can get heat)
 
@@ -200,10 +200,9 @@ Shut down the background daemon:
 ```bash
 dozeguard shutdown
 ```
+i won't recommend using it as there is better way
 
-The CLI works independently of the graphical application and does not require PySide6.
-
-## 🛠️ Install from Source
+##  Install from Source
 
 **Note:** Packages from GitHub Releases are the best way to install as it's very easy. Source installation is only for developers.
 
@@ -215,7 +214,7 @@ Create a virtual environment:
 python3.11 -m venv ~/.venvs/dozeguard
 ```
 
-Install DozeGuard with gui:
+Install DozeGuard:
 
 ```bash
 ~/.venvs/dozeguard/bin/pip install '.[tray]'
@@ -241,8 +240,6 @@ Run the test suite:
 python3 -m pytest
 ```
 
-Automated tests use mocked logind and battery hardware. Actual sleep-inhibition and desktop behavior require testing on a running Linux system.
-
 ## Uninstallation
 
 Remove DozeGuard from your device.
@@ -267,7 +264,7 @@ sudo dnf remove dozeguard-tray dozeguard
 sudo pacman -R dozeguard-tray dozeguard
 ```
 
-If a keep-awake session is active, shut down the daemon before uninstalling:
+If a session is active, shut down the daemon before uninstalling:
 
 ```bash
 dozeguard shutdown
@@ -279,7 +276,7 @@ dozeguard shutdown
 ##important:
 ### Screen Lock vs. System Suspend
 
-DozeGuard prevents system suspend while an active sleep-inhibition session is running.
+DozeGuard prevents system suspend while an active session is already running.
 
 **Important:** Your screen may still dim, turn off, or lock automatically according to your desktop environment's power-management settings. This does not mean the laptop has stopped the task and sleep.
 
