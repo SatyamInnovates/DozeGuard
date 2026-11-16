@@ -75,7 +75,7 @@ Tray behavior and notifications may vary depending on your desktop environment.
 
 See [COMPATIBILITY.md](COMPATIBILITY.md) for more information.
 
-## 📦 Installation
+##  Installation
 
 Download the package from the [GitHub Releases](https://github.com/SatyamInnovates/DozeGuard/releases).
 
