@@ -6,7 +6,10 @@ DozeGuard is a Linux desktop application that keeps your computer awake whenever
 
 it is mainly designed for long tasks like downloading a game, or a agent working and a lot of things.
 
-I noticed a problem where while my agent is working or my games are downloading it takes time till then I go somewhere and laptop sleeps and the work gets disrupt
+**Why i build DozeGuard**
+
+I noticed a problem where while my agent is working or my games are downloading it takes time till then I go somewhere and laptop sleeps and the work gets disrupt but changing system settings are not recommended.
+
 Heading out? Start DozeGuard, activate Lid Mode, and close your laptop without automatically interrupting your running tasks. Your coding agents and background processes can keep working while you're away.
 
 With a simple desktop window, convenient system tray controls, and dedicated Lid Mode, DozeGuard puts you in control and solved these questions.
@@ -17,7 +20,8 @@ With a simple desktop window, convenient system tray controls, and dedicated Lid
 <img width="1912" height="988" alt="image" src="https://github.com/user-attachments/assets/525ca985-bb0c-4af6-abd8-284dd850b8fd" />
 
 
-I built Linux utility in Python that communicates with systemd-logind to prevent automatic system suspension, with a CLI and desktop tray interface.
+I built Linux utility in Python that communicates with systemd-logind to prevent automatic system suspension, with a CLI and desktop tray interface
+
 
 ## Features
 
@@ -28,6 +32,22 @@ I built Linux utility in Python that communicates with systemd-logind to prevent
 - **Background Operation:** You don't need to open the app for it to be working it works on background
 - **Battery Awareness:** Battery information is used for safety. Unknown battery information does not prevent a session from starting.
 - **CLI Fallback:** Manage things from terminal if the graphical interface is unavailable.
+
+## Why DozeGuard instead of changing system settings?
+
+Linux and even other OS give you setting to change that controls what happends when you close your laptop lid. So why build DozeGuard?
+
+The problem is that changing those settings usually changes your system's general behavior. For example, you might disable suspend on lid close, but then your laptop will also stay awake when you don't actually need it.
+
+I wanted something temporary and flexible.
+
+With DozeGuard i can just start it and let my things done then it will stop as you don't need your laptop to be awake when you don't want it.
+
+Instead of permanently changing my power settings, I can control when I want my laptop to stay awake.
+
+Also It's not recommended to change these settings.
+
+**The idea is simple: control when your laptop stays awake, rather than changing how it behaves all the time.**
 
 ## Compatibility
 
